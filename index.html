@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة إيجار يومي شهري مختلط - Online</title>
-    <!-- تصحيح رابط مكتبة Excel -->
+    <title>منظومة إيجار يومي شهري مختلط - V16</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* تصحيح رابط الخطوط */
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
 
         :root {
             --header-bg: #334155; 
             --accent-color: #d4af37;
-            --bg-color: #f9f8f2; /* بيج كريمي */
+            --bg-color: #f9f8f2;
             --card-bg: #ffffff;
             --text-color: #1e293b;
             --danger-color: #ef4444;
             --success-color: #10b981;
+            --pending-color: #f59e0b;
             --alert-bg: #fff3cd;
             --alert-text: #856404;
             --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -26,59 +25,43 @@
         body {
             font-family: 'Tajawal', sans-serif;
             background-color: var(--bg-color);
-            
-            /* خلفية هندسية عشوائية متقاطعة باهتة جداً */
             background-image: 
-                linear-gradient(30deg, rgba(212, 175, 55, 0.05) 1px, transparent 1px),
-                linear-gradient(150deg, rgba(212, 175, 55, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px, 70px 70px, 100px 100px;
+                repeating-linear-gradient(45deg, #d4af37 0, #d4af37 1px, transparent 0, transparent 50px),
+                repeating-linear-gradient(-45deg, #d4af37 0, #d4af37 1px, transparent 0, transparent 50px);
+            background-size: 71px 71px;
             background-attachment: fixed;
-            
             margin: 0; padding: 15px; color: var(--text-color);
-            padding-bottom: 60px; /* مسافة للشريط المصغر */
+            padding-bottom: 80px;
         }
 
         .container { max-width: 600px; margin: 0 auto; position: relative; z-index: 1; }
 
-        /* Loader */
         #loader { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(255,255,255,0.9); z-index: 99999;
+            background: rgba(255,255,255,0.95); z-index: 99999;
             display: flex; justify-content: center; align-items: center;
             font-family: 'Cairo', sans-serif; font-size: 18px; color: var(--header-bg);
             flex-direction: column; gap: 10px;
         }
 
-        /* --- الترويسة --- */
         .main-header {
-            background: var(--header-bg);
-            color: white; padding: 20px; border-radius: 12px;
-            text-align: center; margin-bottom: 20px;
-            box-shadow: var(--shadow-soft);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: var(--header-bg); color: white; padding: 20px; border-radius: 12px;
+            text-align: center; margin-bottom: 20px; box-shadow: var(--shadow-soft);
         }
         .header-content h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
 
-        /* --- الشريط السفلي الثابت (المصغر) --- */
+        /* Footer */
         .fixed-footer {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            height: 35px; /* ارتفاع أصغر */
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 50px;
             background-color: #e5e7eb;
-            background-image: repeating-linear-gradient(45deg, #d1d5db 0px, #d1d5db 1px, transparent 1px, transparent 10px);
-            border-top: 1px solid #94a3b8;
-            display: flex; justify-content: center; align-items: center;
-            z-index: 9999;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            border-top: 2px solid #94a3b8;
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
         }
         .fixed-footer-text {
-            font-family: 'Cairo', sans-serif;
-            font-size: 11px; color: #000000; font-weight: 700; /* خط أصغر */
-            background: rgba(255,255,255,0.9);
-            padding: 2px 12px; border-radius: 15px;
+            font-family: 'Cairo', sans-serif; font-size: 14px; color: #000000; font-weight: 700;
+            background: rgba(255,255,255,0.8); padding: 5px 15px; border-radius: 20px;
         }
 
-        /* --- المالية --- */
         .finance-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .finance-card {
             background: white; padding: 12px; border-radius: 10px; text-align: center;
@@ -89,18 +72,628 @@
         .finance-card.net { border-top-color: #8b5cf6; }
         .finance-card.net .finance-val { color: #8b5cf6; }
 
-        /* --- الأزرار --- */
+        /* زرار الإدارة */
+        .admin-btn {
+            background: linear-gradient(to right, #374151, #111827); color: #ffd700;
+            border: 1px solid #ffd700; grid-column: span 3; margin-top: 5px;
+        }
+
         .action-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
         .btn-action {
             border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;
             color: white; font-family: 'Tajawal'; font-size: 11px; display: flex; flex-direction: column;
             align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .btn-close { background: #475569; }
+        .btn-close { background: #f59e0b; color: #fff; }
         .btn-print { background: #d97706; }
         .btn-excel { background: #059669; }
 
-        /* --- العدادات --- */
+        .status-header { display: flex; gap: 10px; margin-bottom: 20px; }
+        .status-card {
+            flex: 1; background: white; padding: 10px; border-radius: 12px; text-align: center;
+            box-shadow: var(--shadow-soft); border: 1px solid #e2e8f0;
+        }
+        .counter { font-size: 24px; font-weight: 800; color: var(--header-bg); }
+        .status-card h3 { margin: 0; font-size: 11px; color: #64748b; }
+
+        .form-box { background: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: var(--shadow-soft); }
+        .form-header { font-size: 16px; color: var(--header-bg); border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 15px; font-weight: 700; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .full-width { grid-column: span 2; }
+
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 12px; color: #475569; }
+        input, select {
+            width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;
+            font-size: 14px; background: #f8fafc; box-sizing: border-box; font-family: 'Tajawal';
+        }
+        input:focus, select:focus { border-color: var(--header-bg); background: white; outline: none; }
+        .readonly-field { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+
+        .monthly-section, .bank-section { display: none; background: #fffbeb; border: 1px dashed #f59e0b; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+        .bank-section { background: #eff6ff; border: 1px solid #bfdbfe; margin-top: 10px; }
+        
+        .vacancy-input { text-align: center; color: var(--success-color); font-weight: bold; font-size: 16px; }
+        
+        .btn-whatsapp {
+            background: #25D366; color: white; border: none; padding: 14px; border-radius: 10px;
+            font-size: 15px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 20px;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+
+        #checkoutAlert {
+            display: none; background-color: var(--alert-bg); color: var(--alert-text);
+            border: 1px solid #ffeeba; padding: 8px; text-align: center;
+            font-size: 13px; font-weight: bold; border-radius: 8px; margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+
+        .history-box { background: white; padding: 10px; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-soft); }
+        .history-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px;
+        }
+        .history-header h3 { margin: 0; font-size: 14px; color: #64748b; }
+        .del-buttons { display: flex; gap: 5px; }
+        .btn-mini-del {
+            border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;
+            font-size: 10px; font-weight: bold; color: white; font-family: 'Tajawal';
+        }
+        .btn-del-handed { background-color: #64748b; }
+        .btn-del-expired { background-color: #ef4444; }
+
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; } 
+        th { text-align: center; font-size: 10px; color: #64748b; padding: 8px 2px; border-bottom: 2px solid #f1f5f9; background: #f8fafc; }
+        td { padding: 8px 2px; border-bottom: 1px solid #f1f5f9; font-size: 11px; text-align: center; vertical-align: middle; word-wrap: break-word;}
+        
+        .col-room { width: 15%; font-weight: bold; }
+        .col-amt { width: 15%; font-weight: bold; color: var(--header-bg); }
+        .col-pay { width: 25%; font-size: 10px; }
+        .col-date { width: 20%; font-size: 9px; color: #64748b; }
+        .col-stat { width: 10%; }
+        .col-act { width: 15%; }
+
+        .pending-transfer { color: var(--danger-color); cursor: pointer; text-decoration: underline; font-weight: bold; }
+        .confirmed-transfer { color: var(--success-color); font-weight: bold; }
+
+        .status-icon { font-size: 14px; }
+        tr.handed-over { background-color: #f8fafc; opacity: 0.6; }
+        tr.pending-approval { background-color: #fff7ed; border-right: 4px solid var(--pending-color); }
+        
+        .btn-out { background: var(--danger-color); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; }
+
+        @media print {
+            body * { visibility: hidden; }
+            .history-box, .history-box * { visibility: visible; }
+            .history-box { position: absolute; left: 0; top: 0; width: 100%; padding: 0; background: white; box-shadow: none; }
+            .history-header, #checkoutAlert, .admin-btn { display: none; }
+            tr.handed-over, button, .btn-out, .action-buttons, .form-box, .status-header, .finance-section, .main-header, .fixed-footer { display: none !important; }
+            table { border: 1px solid #000; width: 100%; direction: rtl; border-collapse: collapse; }
+            th, td { border: 1px solid #000; padding: 5px; color: #000; text-align: center; font-size: 10pt; }
+            th { background: #eee !important; -webkit-print-color-adjust: exact; }
+            .history-box::before { content: "تقرير العمليات الغير مرحلة"; display: block; text-align: center; font-size: 16pt; font-weight: bold; margin-bottom: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="loader">
+    <div>⏳</div>
+    <div>جاري الاتصال بالسيرفر...</div>
+</div>
+
+<div class="container">
+    <div class="main-header">
+        <div class="header-content">
+            <h1>🏢 منظومة إيجار يومي شهري مختلط</h1>
+        </div>
+    </div>
+
+    <div class="finance-section">
+        <div class="finance-card">
+            <div class="finance-val"><span id="totalCash">0</span></div>
+            <h4>نقدى (الكاش)</h4>
+        </div>
+        <div class="finance-card net">
+            <div class="finance-val"><span id="totalNet">0</span></div>
+            <h4>شبكة / تحويل</h4>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button class="btn-action btn-close" onclick="requestHandover()">✋ طلب توريد (للموظف)</button>
+        <button class="btn-action btn-print" onclick="window.print()">🖨️ طباعة</button>
+        <button class="btn-action btn-excel" onclick="exportToExcel()">📊 اكسيل</button>
+        <button class="btn-action admin-btn" onclick="approveHandover()">🔑 اعتماد التوريد (للإدارة)</button>
+    </div>
+
+    <div class="status-header">
+        <div class="status-card">
+            <h3>شاغر (غرفة وصالة)</h3>
+            <span class="counter" id="count-1bhk">...</span>
+        </div>
+        <div class="status-card">
+            <h3>شاغر (غرفتين)</h3>
+            <span class="counter" id="count-2bhk">...</span>
+        </div>
+    </div>
+
+    <div class="form-box">
+        <div class="form-header">تسجيل حجز جديد</div>
+        <form id="checkinForm">
+            <div class="form-grid">
+                <div class="full-width">
+                    <label>مصدر الحجز</label>
+                    <select id="bookingSource">
+                        <option value="استقبال" selected>استقبال (Reception)</option>
+                        <option value="بوكينج">بوكينج (Booking.com)</option>
+                    </select>
+                </div>
+                <div class="full-width">
+                    <label>التاريخ</label>
+                    <select id="checkInDate" required onchange="calculateCheckout()"></select>
+                </div>
+                <div>
+                    <label>النوع</label>
+                    <select id="rentType" onchange="toggleRentType()">
+                        <option value="يومي">يومي</option>
+                        <option value="شهري">شهري</option>
+                    </select>
+                </div>
+                <div>
+                    <label>الليالي</label>
+                    <input type="number" id="nightsCount" min="1" placeholder="..." required oninput="calculateCheckout()">
+                </div>
+                <div class="full-width">
+                    <label>الخروج</label>
+                    <input type="text" id="checkOutDate" class="readonly-field" readonly>
+                </div>
+                <div>
+                    <label>رقم الغرفة</label>
+                    <input type="number" id="roomNumber" required placeholder="101">
+                </div>
+                <div>
+                    <label>نوع الغرفة</label>
+                    <select id="roomTypeInput">
+                        <option value="1bhk">غرفة وصالة</option>
+                        <option value="2bhk">غرفتين</option>
+                    </select>
+                </div>
+            </div>
+
+            <hr style="border:0; border-top:1px dashed #e2e8f0; margin: 15px 0;">
+
+            <div id="dailyFinanceGroup">
+                <label>المبلغ المدفوع</label>
+                <input type="number" id="amount" placeholder="ريال" oninput="calculateRemaining()">
+            </div>
+
+            <div id="monthlyFinanceGroup" class="monthly-section">
+                <div class="form-grid">
+                    <div class="full-width">
+                        <label>الإجمالي</label>
+                        <input type="number" id="totalMonthlyRent" oninput="calculateRemaining()">
+                    </div>
+                    <div>
+                        <label>مدفوع</label>
+                        <input type="number" id="paidMonthlyAmount" oninput="calculateRemaining()">
+                    </div>
+                    <div>
+                        <label>متبقي</label>
+                        <input type="number" id="remainingAmount" class="readonly-field" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-grid" style="margin-top: 15px;">
+                <div class="full-width">
+                    <label>طريقة الدفع</label>
+                    <select id="paymentMethod" onchange="toggleBankSection()">
+                        <option value="نقدى" selected>نقدى</option>
+                        <option value="شبكة">شبكة</option>
+                        <option value="تحويل">تحويل بنكي</option>
+                    </select>
+                </div>
+
+                <div id="bankSection" class="bank-section full-width">
+                    <label style="color:#1d4ed8;">حالة الحوالة</label>
+                    <select id="bankStatusSelect">
+                        <option value="" disabled selected>-- اختر الحالة --</option>
+                        <option value="confirmed">✅ تم الاستلام</option>
+                        <option value="pending">⏳ لم يتم التأكيد</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="color:var(--success-color)">متبقي (غرفة وصالة)</label>
+                    <input type="number" id="vac1Input" class="vacancy-input" onfocus="this.value=''" placeholder="تعديل">
+                </div>
+                <div>
+                    <label style="color:var(--success-color)">متبقي (غرفتين)</label>
+                    <input type="number" id="vac2Input" class="vacancy-input" onfocus="this.value=''" placeholder="تعديل">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-whatsapp">حفظ وإرسال 📱</button>
+        </form>
+    </div>
+
+    <div id="checkoutAlert"></div>
+
+    <div class="history-box">
+        <div class="history-header">
+            <h3>سجل العمليات</h3>
+            <div class="del-buttons">
+                <button class="btn-mini-del btn-del-handed" onclick="deleteHandedOver()">🗑️ حذف المرحل</button>
+                <button class="btn-mini-del btn-del-expired" onclick="deleteExpired()">⏳ حذف المنتهي</button>
+            </div>
+        </div>
+        <table id="historyTable">
+            <thead>
+                <tr>
+                    <th class="col-room">الغرفة</th>
+                    <th class="col-amt">المبلغ</th>
+                    <th class="col-pay">طريقة الدفع</th>
+                    <th class="col-date">التاريخ</th>
+                    <th class="col-stat">مرحل</th>
+                    <th class="col-act">خروج</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="fixed-footer">
+    <div class="fixed-footer-text">
+        تنفذ: أيمن أبو وردة | 77aayy@gmail.com
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBY09i3QHvaZFmNpOUHYEIFoU_3dJvycso",
+      authDomain: "hotel-system-3dd07.firebaseapp.com",
+      databaseURL: "https://hotel-system-3dd07-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "hotel-system-3dd07",
+      storageBucket: "hotel-system-3dd07.firebasestorage.app",
+      messagingSenderId: "134497063312",
+      appId: "1:134497063312:web:d8f589f291d55a85a2e315"
+    };
+
+    let app, db;
+    try {
+        app = initializeApp(firebaseConfig);
+        db = getDatabase(app);
+        document.getElementById('loader').style.display = 'none';
+    } catch(e) {
+        document.getElementById('loader').innerHTML = "<div style='color:red'>خطأ في الاتصال بالسيرفر!</div>";
+        console.error(e);
+    }
+
+    let transactions = [];
+    const transactionsRef = ref(db, 'transactions');
+    const vacancyRef = ref(db, 'vacancies');
+
+    onValue(transactionsRef, (snapshot) => {
+        const data = snapshot.val();
+        transactions = [];
+        if (data) {
+            Object.keys(data).forEach(key => {
+                transactions.push({ ...data[key], firebaseKey: key });
+            });
+            transactions.sort((a, b) => b.id - a.id);
+        }
+        updateUI();
+    });
+
+    onValue(vacancyRef, (snapshot) => {
+        const data = snapshot.val() || { v1: 0, v2: 0 };
+        document.getElementById('vac1Input').value = data.v1;
+        document.getElementById('vac2Input').value = data.v2;
+        updateTopCounters(data.v1, data.v2);
+    });
+
+    window.saveVacanciesToCloud = function() {
+        const v1 = document.getElementById('vac1Input').value;
+        const v2 = document.getElementById('vac2Input').value;
+        update(vacancyRef, { v1: v1, v2: v2 });
+    }
+
+    window.updateTopCounters = function(v1, v2) {
+        if(v1 === undefined) { saveVacanciesToCloud(); return; }
+        document.getElementById('count-1bhk').innerText = v1;
+        document.getElementById('count-2bhk').innerText = v2;
+    };
+
+    document.getElementById('checkinForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        window.calculateRemaining();
+
+        const rTypeInput = document.getElementById('roomTypeInput').value;
+        const rType = document.getElementById('rentType').value;
+        
+        let currentV1 = parseInt(document.getElementById('vac1Input').value) || 0;
+        let currentV2 = parseInt(document.getElementById('vac2Input').value) || 0;
+
+        if(rTypeInput === '1bhk' && currentV1 > 0) currentV1--;
+        else if(rTypeInput === '2bhk' && currentV2 > 0) currentV2--;
+        
+        update(vacancyRef, { v1: currentV1, v2: currentV2 });
+
+        let bankNote = '';
+        const pMethod = document.getElementById('paymentMethod').value;
+        if(pMethod === 'تحويل') {
+            const bStatus = document.getElementById('bankStatusSelect').value;
+            bankNote = (bStatus === 'confirmed') ? ' (تم الاستلام ✅)' : ' (لم يؤكد ⏳)';
+        }
+
+        const data = {
+            id: Date.now(),
+            roomNumber: document.getElementById('roomNumber').value,
+            roomType: rTypeInput,
+            roomTypeName: (rTypeInput === '1bhk') ? 'غرفة وصالة' : 'غرفتين',
+            bookingSource: document.getElementById('bookingSource').value,
+            amount: document.getElementById('amount').value,
+            paymentMethod: pMethod + bankNote,
+            rentType: rType,
+            checkIn: new Date(document.getElementById('checkInDate').value).toLocaleDateString('en-GB'),
+            nights: document.getElementById('nightsCount').value,
+            checkOut: document.getElementById('checkOutDate').value,
+            actionTime: new Date().toLocaleString('en-GB'),
+            status: 'active',
+            isHandedOver: false,
+            totalContract: document.getElementById('totalMonthlyRent').value || 0,
+            debt: document.getElementById('remainingAmount').value || 0
+        };
+
+        push(transactionsRef, data);
+        sendWhatsapp(data);
+        
+        this.reset();
+        setupDateDropdown();
+        toggleRentType();
+        toggleBankSection();
+    });
+
+    window.deleteHandedOver = function() {
+        if(confirm('حذف جميع السجلات المرحلة؟')) {
+            transactions.forEach(t => {
+                if(t.isHandedOver === true) remove(ref(db, `transactions/${t.firebaseKey}`));
+            });
+        }
+    }
+
+    window.deleteExpired = function() {
+        if(confirm('حذف الحجوزات المنتهية؟')) {
+            transactions.forEach(t => {
+                if(t.status === 'completed') remove(ref(db, `transactions/${t.firebaseKey}`));
+            });
+        }
+    }
+
+    // 1. زر الموظف: طلب توريد
+    window.requestHandover = function() {
+        const pending = transactions.some(t => t.isHandedOver === false);
+        if(!pending) { alert('لا توجد مبالغ جديدة لطلب توريدها.'); return; }
+        
+        if(confirm('هل تريد إرسال طلب توريد للإدارة؟ (سيظهر باللون البرتقالي)')) {
+            const updates = {};
+            transactions.forEach(t => {
+                if(t.isHandedOver === false) {
+                    updates[`transactions/${t.firebaseKey}/isHandedOver`] = 'pending';
+                }
+            });
+            update(ref(db), updates);
+            alert('تم إرسال الطلب! بانتظار موافقة المدير.');
+        }
+    }
+
+    // 2. زر المدير: اعتماد التوريد (بكود fahd5)
+    window.approveHandover = function() {
+        const hasRequests = transactions.some(t => t.isHandedOver === 'pending');
+        if(!hasRequests) { alert('لا توجد طلبات توريد معلقة للموافقة عليها.'); return; }
+
+        const pin = prompt("أدخل كود المدير لاعتماد التوريد:");
+        if(pin === 'fahd5') {
+            const updates = {};
+            transactions.forEach(t => {
+                if(t.isHandedOver === 'pending') {
+                    updates[`transactions/${t.firebaseKey}/isHandedOver`] = true;
+                }
+            });
+            update(ref(db), updates);
+            alert('تم اعتماد التوريد وتصفير العهدة بنجاح ✅');
+        } else {
+            alert('كود خاطئ! ❌');
+        }
+    }
+
+    window.checkoutRoom = function(firebaseKey) {
+        if(confirm('خروج؟')) {
+            update(ref(db, `transactions/${firebaseKey}`), { status: 'completed' });
+        }
+    }
+
+    window.toggleBankStatus = function(firebaseKey, currentStatus) {
+        if(currentStatus.includes('لم يؤكد')) {
+            if(confirm('تأكيد الاستلام؟')) {
+                const newStatus = currentStatus.replace('لم يؤكد ⏳', 'تم الاستلام ✅');
+                update(ref(db, `transactions/${firebaseKey}`), { paymentMethod: newStatus });
+            }
+        }
+    }
+
+    window.updateUI = function() {
+        const tbody = document.querySelector('#historyTable tbody');
+        tbody.innerHTML = '';
+        let currentCash = 0, currentNet = 0, checkoutCount = 0;
+        const todayStr = new Date().toLocaleDateString('en-GB');
+
+        transactions.forEach((t) => {
+            if (t.isHandedOver !== true) {
+                if(t.paymentMethod.includes('نقدى')) currentCash += parseFloat(t.amount || 0);
+                else currentNet += parseFloat(t.amount || 0);
+            }
+            if (t.status === 'active' && t.checkOut === todayStr) checkoutCount++;
+
+            const row = document.createElement('tr');
+            
+            let handIcon = '';
+            if (t.isHandedOver === true) {
+                row.classList.add('handed-over');
+                handIcon = '<span class="status-icon status-ok">✅</span>';
+            } else if (t.isHandedOver === 'pending') {
+                row.classList.add('pending-approval');
+                handIcon = '<span class="status-icon" style="color:orange">⏳ معلق</span>';
+            } else {
+                handIcon = '<span class="status-icon status-wait">🆕</span>';
+            }
+
+            let paymentDisplay = t.paymentMethod;
+            if (t.paymentMethod.includes('لم يؤكد')) {
+                paymentDisplay = `<span class="pending-transfer" onclick="toggleBankStatus('${t.firebaseKey}', '${t.paymentMethod}')">${t.paymentMethod}</span>`;
+            } else if (t.paymentMethod.includes('تم الاستلام')) {
+                paymentDisplay = `<span class="confirmed-transfer">${t.paymentMethod}</span>`;
+            }
+
+            let roomDisplay = `<strong>${t.roomNumber}</strong><br><span style="font-size:9px; color:#94a3b8;">${t.roomTypeName}</span>`;
+            let dateDisplay = `${t.checkIn}<br>${t.checkOut}`;
+            let btn = t.status === 'active' 
+                ? `<button class="btn-out" onclick="checkoutRoom('${t.firebaseKey}')">خروج</button>` 
+                : '✔';
+
+            row.innerHTML = `
+                <td>${roomDisplay}</td>
+                <td style="color:${t.isHandedOver === true ? 'inherit' : 'var(--header-bg)'}; font-weight:bold;">${t.amount}</td>
+                <td>${paymentDisplay}</td>
+                <td style="font-size:9px;">${dateDisplay}</td>
+                <td>${handIcon}</td>
+                <td>${btn}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        document.getElementById('totalCash').innerText = currentCash;
+        document.getElementById('totalNet').innerText = currentNet;
+
+        const alertBox = document.getElementById('checkoutAlert');
+        if (checkoutCount > 0) {
+            alertBox.style.display = 'block';
+            alertBox.innerText = `⚠️ اليوم يوجد (${checkoutCount}) حالات خروج`;
+        } else {
+            alertBox.style.display = 'none';
+        }
+    }
+
+    window.toggleRentType = function() {
+        const type = document.getElementById('rentType').value;
+        const daily = document.getElementById('dailyFinanceGroup');
+        const monthly = document.getElementById('monthlyFinanceGroup');
+        const nights = document.getElementById('nightsCount');
+        if (type === 'شهري') {
+            daily.style.display = 'none'; monthly.style.display = 'block';
+            nights.value = 30; nights.readOnly = true; nights.style.backgroundColor = "#e2e8f0";
+            window.calculateCheckout();
+        } else {
+            daily.style.display = 'block'; monthly.style.display = 'none';
+            nights.value = ''; nights.readOnly = false; nights.style.backgroundColor = "#f8fafc";
+            document.getElementById('checkOutDate').value = '';
+        }
+    }
+    
+    window.toggleBankSection = function() {
+        const method = document.getElementById('paymentMethod').value;
+        const bankSec = document.getElementById('bankSection');
+        const bankInput = document.getElementById('bankStatusSelect');
+        if (method === 'تحويل') {
+            bankSec.style.display = 'block'; bankInput.setAttribute('required', 'required');
+        } else {
+            bankSec.style.display = 'none'; bankInput.removeAttribute('required');
+        }
+    }
+
+    window.calculateRemaining = function() {
+        if (document.getElementById('rentType').value === 'شهري') {
+            const total = parseFloat(document.getElementById('totalMonthlyRent').value) || 0;
+            const paid = parseFloat(document.getElementById('paidMonthlyAmount').value) || 0;
+            document.getElementById('remainingAmount').value = total - paid;
+            document.getElementById('amount').value = paid; 
+        }
+    }
+
+    window.calculateCheckout = function() {
+        const dateVal = document.getElementById('checkInDate').value;
+        const nights = document.getElementById('nightsCount').value;
+        if (!dateVal || !nights) { document.getElementById('checkOutDate').value = ''; return; }
+        const d = new Date(dateVal);
+        d.setDate(d.getDate() + parseInt(nights));
+        document.getElementById('checkOutDate').value = d.toLocaleDateString('en-GB');
+    }
+
+    window.setupDateDropdown = function() {
+        const select = document.getElementById('checkInDate');
+        const hour = new Date().getHours();
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const fVal = d => d.toISOString().split('T')[0];
+        const fDis = d => d.toLocaleDateString('en-GB');
+        let html = '';
+        if (hour >= 0 && hour < 6) {
+            html += `<option value="${fVal(yesterday)}" selected>📅 قديم (${fDis(yesterday)})</option>`;
+            html += `<option value="${fVal(today)}">☀️ جديد (${fDis(today)})</option>`;
+        } else {
+            html += `<option value="${fVal(today)}" selected>☀️ جديد (${fDis(today)})</option>`;
+        }
+        select.innerHTML = html;
+    }
+
+    window.sendWhatsapp = function(data) {
+        let moneyDetails = `*💰 المبلغ:* ${data.amount} ريال`;
+        if (data.rentType === 'شهري') moneyDetails += `\n*📉 العقد:* ${data.totalContract}\n*⚠️ الباقي:* ${data.debt}`;
+        const v1 = document.getElementById('vac1Input').value;
+        const v2 = document.getElementById('vac2Input').value;
+        const text = `
+*${data.roomNumber} - ${data.roomTypeName}*
+----------------------------
+*العقد:* ${data.rentType} (${data.bookingSource})
+${moneyDetails}
+*🗓️* ${data.checkIn} ➔ ${data.checkOut}
+*💳* ${data.paymentMethod}
+*🔢 الشاغر:* ${v1} (غرفة وصالة) | ${v2} (غرفتين)
+`;
+        const url = `https://wa.me/?text=${encodeURIComponent(text.trim())}`;
+        window.open(url, '_blank');
+    }
+
+    window.exportToExcel = function() {
+        if(transactions.length === 0) { alert('لا توجد بيانات'); return; }
+        const exportData = transactions.map(t => ({
+            "الغرفة": t.roomNumber, "النوع": t.roomTypeName, "المصدر": t.bookingSource,
+            "العقد": t.rentType, "المبلغ": t.amount, "الدفع": t.paymentMethod, 
+            "دخول": t.checkIn, "خروج": t.checkOut, "الحالة": t.isHandedOver ? "تم التوريد" : "جديد"
+        }));
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "التقرير");
+        XLSX.writeFile(wb, `تقرير_${new Date().toLocaleDateString('en-CA')}.xlsx`);
+    }
+
+    setupDateDropdown();
+    toggleRentType();
+    toggleBankSection();
+
+</script>
+
+</body>
+</html>
+
+
         .status-header { display: flex; gap: 10px; margin-bottom: 20px; }
         .status-card {
             flex: 1; background: white; padding: 10px; border-radius: 12px; text-align: center;
