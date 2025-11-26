@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة إيجار يومي شهري مختلط - V32</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <title>منظومة إيجار يومي شهري مختلط - V34 Ultimate</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
-
+        /* ... نفس الستايل السابق ... */
         :root {
             --header-bg: #334155; 
             --accent-color: #d4af37;
@@ -53,18 +53,21 @@
 
         #loader { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(255,255,255,1); z-index: 99999; /* خلفية بيضاء بالكامل */
+            background: rgba(255,255,255,0.98); z-index: 99999;
             display: flex; justify-content: center; align-items: center;
-            font-family: 'Cairo', sans-serif; font-size: 18px; color: var(--header-bg);
-            flex-direction: column; gap: 15px; transition: opacity 0.5s ease;
+            font-family: 'Cairo', sans-serif; font-size: 16px; color: var(--header-bg);
+            flex-direction: column; gap: 10px; transition: opacity 0.5s;
         }
-        /* تأثير دوران للودر */
-        .spinner {
-            width: 40px; height: 40px; border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--accent-color); border-radius: 50%;
-            animation: spin 1s linear infinite;
+        
+        /* شريط التقدم الجديد */
+        .progress-bar-container {
+            width: 80%; max-width: 300px; height: 6px; background: #e2e8f0;
+            border-radius: 10px; overflow: hidden; margin-top: 10px;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .progress-bar-fill {
+            height: 100%; background: var(--success-color); width: 0%;
+            transition: width 0.3s ease;
+        }
 
         .main-header {
             background: var(--header-bg); color: white; padding: 15px; border-radius: 12px;
@@ -239,8 +242,16 @@
 <body>
 
 <div id="loader">
-    <div class="spinner"></div>
-    <div>جاري الاتصال بالسيرفر...</div>
+    <div class="spinner" style="font-size:30px;">⏳</div>
+    <div id="loaderText">جاري الاتصال بالسيرفر...</div>
+    
+    <div class="progress-bar-container">
+        <div id="progressBarFill" class="progress-bar-fill"></div>
+    </div>
+
+    <button id="forceOpenBtn" style="display:none; margin-top:20px; padding:10px 20px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('loader').style.display='none'">
+        ⚠️ فتح النظام بالقوة (تجاوز الانتظار)
+    </button>
 </div>
 
 <div id="toast-container">
@@ -303,7 +314,7 @@
                 </div>
                 <div class="full-width">
                     <label>التاريخ</label>
-                    <select id="checkInDate" required onchange="calculateCheckout()"></select>
+                    <select id="checkInDate" onchange="calculateCheckout()"></select>
                 </div>
                 <div>
                     <label>النوع</label>
@@ -335,11 +346,9 @@
 
             <hr style="border:0; border-top:1px dashed #e2e8f0; margin: 15px 0;">
 
-            <!-- القسم المالي المتغير -->
             <div class="finance-group">
                 <div class="finance-label" id="financeLabel">تفاصيل الإيجار</div>
                 <div class="form-grid">
-                    <!-- خانة إيجار اليوم الواحد -->
                     <div id="dailyRateDiv">
                         <label style="color:var(--booking-blue)">إيجار اليوم الواحد</label>
                         <input type="number" id="dailyRate" placeholder="سعر الليلة" oninput="calculateDailyTotal()">
@@ -371,7 +380,6 @@
                     </select>
                 </div>
 
-                <!-- قسم الدفع المختلط -->
                 <div id="mixedSection" class="mixed-section full-width">
                     <div class="form-grid">
                         <div>
@@ -385,7 +393,6 @@
                     </div>
                 </div>
 
-                <!-- قسم الحوالة -->
                 <div id="bankSection" class="bank-section full-width">
                     <label style="color:#1d4ed8;">حالة الحوالة</label>
                     <select id="bankStatusSelect">
@@ -395,7 +402,6 @@
                     </select>
                 </div>
 
-                <!-- الشواغر والحجوزات -->
                 <div class="full-width" style="border-top:1px solid #eee; margin-top:10px; padding-top:10px;">
                     <label style="text-align:center; color:#475569; margin-bottom:10px;">تحديث حالة الفندق</label>
                     <div class="form-grid">
@@ -455,6 +461,21 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+    setTimeout(() => {
+        const loader = document.getElementById('loader');
+        const btn = document.getElementById('forceOpenBtn');
+        const txt = document.getElementById('loaderText');
+        
+        if (loader && loader.style.display !== 'none') {
+            txt.innerHTML = "<span style='color:red; font-weight:bold'>الشبكة بطيئة، جاري المحاولة...</span>";
+            btn.style.display = 'block';
+        }
+    }, 8000); 
+</script>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -473,21 +494,125 @@
     try {
         app = initializeApp(firebaseConfig);
         db = getDatabase(app);
-        // سيتم إخفاء اللودر فقط بعد وصول البيانات
     } catch(e) {
-        document.getElementById('loader').innerHTML = "<div style='color:red'>خطأ في الاتصال بالسيرفر!</div>";
+        document.getElementById('loaderText').innerHTML = "<div style='color:red'>خطأ في تهيئة النظام!</div>";
+        document.getElementById('forceOpenBtn').style.display = 'block';
         console.error(e);
     }
 
     let transactions = [];
     const transactionsRef = ref(db, 'transactions');
     const vacancyRef = ref(db, 'vacancies');
+
     let lastReportTime = 0;
+
+    // --- نظام التحميل المتدرج مع مؤشر التقدم (مدمج) ---
+    window.setupLazyLoading = function() {
+        let currentIndex = 0;
+        const batchSize = 20; 
+        const totalItems = transactions.length; // لحساب النسبة المئوية
+        
+        function loadNextBatch() {
+            const batch = transactions.slice(currentIndex, currentIndex + batchSize);
+            currentIndex += batchSize;
+            
+            window.updateUIBatch(batch);
+            
+            // تحديث شريط التقدم (اضافة الصديق الثالث)
+            if (totalItems > 0) {
+                const progress = Math.min(100, Math.round((currentIndex / totalItems) * 100));
+                const bar = document.getElementById('progressBarFill');
+                const txt = document.getElementById('loaderText');
+                if(bar) bar.style.width = `${progress}%`;
+                if(txt && progress < 100) txt.innerText = `جاري جلب البيانات... ${progress}%`;
+            }
+
+            if (currentIndex < transactions.length) {
+                setTimeout(loadNextBatch, 50); 
+            } else {
+                const loader = document.getElementById('loader');
+                if(loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => { loader.style.display = 'none'; }, 500);
+                }
+            }
+        }
+        
+        document.querySelector('#historyTable tbody').innerHTML = '';
+        loadNextBatch();
+    }
+
+    window.updateUIBatch = function(batch) {
+        const tbody = document.querySelector('#historyTable tbody');
+        const todayStr = new Date().toLocaleDateString('en-GB');
+
+        batch.forEach((t) => {
+            if (!t.roomNumber) return;
+
+            const row = document.createElement('tr');
+            let statusText = '';
+            if (t.isHandedOver === true) {
+                row.classList.add('handed-over'); statusText = '<span class="status-done">تم التوريد</span>';
+            } else if (t.isHandedOver === 'pending') {
+                row.classList.add('pending-approval'); statusText = '<span class="status-pending">⏳ انتظار</span>';
+            } else {
+                statusText = '<span class="status-new">🆕 جديد</span>';
+            }
+
+            let paymentDisplay = t.paymentMethod;
+            if (t.paymentMethod.includes('لم يؤكد')) {
+                paymentDisplay = `<span class="pending-transfer" onclick="toggleBankStatus('${t.firebaseKey}', '${t.paymentMethod}')">${t.paymentMethod}</span>`;
+            } else if (t.paymentMethod.includes('تم الاستلام')) {
+                paymentDisplay = `<span class="confirmed-transfer">${t.paymentMethod}</span>`;
+            }
+
+            const dateObj = new Date(t.checkIn);
+            let dateDisplay = t.checkIn;
+            if(!isNaN(dateObj)) {
+                const dayName = dateObj.toLocaleDateString('ar-EG', { weekday: 'long' });
+                const datePart = dateObj.toLocaleDateString('en-GB');
+                dateDisplay = `${datePart} ${dayName}`;
+            }
+
+            let roomDisplay = `<strong>${t.roomNumber}</strong><br><span style="font-size:9px; color:#94a3b8;">${t.roomTypeName}</span>`;
+            let btn = t.status === 'active' ? `<button class="btn-out" onclick="checkoutRoom('${t.firebaseKey}')">خروج</button>` : '✔';
+
+            row.innerHTML = `
+                <td>${roomDisplay}</td>
+                <td style="color:${t.isHandedOver === true ? 'inherit' : 'var(--header-bg)'}; font-weight:bold;">${t.amount}</td>
+                <td>${paymentDisplay}</td>
+                <td style="font-size:9px;">${dateDisplay}<br>${t.checkOut}</td>
+                <td style="font-size:10px; font-weight:bold;">${statusText}</td>
+                <td>${btn}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    // --- نظام إعادة المحاولة (اضافة الصديق الثالث) ---
+    window.retryFailedOperations = function() {
+        const failedOps = JSON.parse(localStorage.getItem('failed_operations') || '[]');
+        if (failedOps.length > 0) {
+            showGlassToast(`🔄 جاري إعادة ${failedOps.length} عملية فاشلة`, '🔄');
+            failedOps.forEach((op, index) => {
+                setTimeout(() => {
+                    if (op.type === 'transaction') {
+                        push(transactionsRef, op.data)
+                            .then(() => {
+                                failedOps.splice(index, 1);
+                                localStorage.setItem('failed_operations', JSON.stringify(failedOps));
+                            })
+                            .catch(console.error);
+                    }
+                }, index * 1000);
+            });
+        }
+    };
 
     onValue(transactionsRef, (snapshot) => {
         const data = snapshot.val();
         transactions = [];
-        lastReportTime = 0; 
+        lastReportTime = 0;
         
         if (data) {
             Object.keys(data).forEach(key => {
@@ -500,12 +625,18 @@
             });
             transactions.sort((a, b) => b.id - a.id);
         }
-        updateUI();
+
+        updateStatistics();
+        setupLazyLoading();
         checkReportTimer();
         
-        // إخفاء اللودر عند وصول البيانات
-        document.getElementById('loader').style.opacity = '0';
-        setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 500);
+        // محاولة إعادة العمليات الفاشلة عند نجاح الاتصال
+        window.retryFailedOperations();
+
+    }, (error) => {
+        console.error(error);
+        document.getElementById('loaderText').innerText = "تعذر جلب البيانات، نعمل دون اتصال";
+        document.getElementById('forceOpenBtn').style.display = 'block';
     });
 
     onValue(vacancyRef, (snapshot) => {
@@ -514,10 +645,63 @@
         document.getElementById('vac2Input').value = data.v2;
         document.getElementById('book1Input').value = data.b1 || '';
         document.getElementById('book2Input').value = data.b2 || '';
+        
         updateTopCounters(data.v1, data.v2, data.b1, data.b2);
     });
 
-    // --- مؤقت التنبيه ---
+    window.updateStatistics = function() {
+        let currentCash = 0, currentNet = 0, checkoutCount = 0;
+        const todayStr = new Date().toLocaleDateString('en-GB');
+        let hasNew = false, hasPending = false;
+
+        transactions.forEach((t) => {
+            if (!t.roomNumber) return;
+
+            if (t.isHandedOver === false) hasNew = true;
+            if (t.isHandedOver === 'pending') hasPending = true;
+
+            if (t.isHandedOver !== true) {
+                const amt = parseFloat(t.amount || 0);
+                if (t.mixDetails) {
+                    currentCash += parseFloat(t.mixDetails.cash || 0);
+                    currentNet += parseFloat(t.mixDetails.net || 0);
+                } else {
+                    if(t.paymentMethod.includes('نقدى')) currentCash += amt;
+                    else currentNet += amt;
+                }
+            }
+            if (t.status === 'active' && t.checkOut === todayStr) checkoutCount++;
+        });
+
+        document.getElementById('totalCash').innerText = currentCash;
+        document.getElementById('totalNet').innerText = currentNet;
+
+        const adminBtn = document.getElementById('adminBtn');
+        adminBtn.className = 'btn-action admin-btn'; 
+        if (hasPending) {
+            adminBtn.classList.add('btn-admin-orange');
+            adminBtn.innerHTML = '⏳ يوجد طلب توريد معلق (اضغط للاعتماد)';
+            adminBtn.disabled = false;
+        } else if (hasNew) {
+            adminBtn.classList.add('btn-admin-red');
+            adminBtn.innerHTML = '⚠️ يوجد مبالغ لم تطلب (تنبيه)';
+            adminBtn.disabled = true;
+        } else {
+            adminBtn.classList.add('btn-admin-gray');
+            adminBtn.innerHTML = '✅ العهدة صفر (لا يوجد توريد)';
+            adminBtn.disabled = true;
+        }
+
+        const alertBox = document.getElementById('checkoutAlert');
+        if (checkoutCount > 0) {
+            alertBox.style.display = 'block';
+            alertBox.innerText = `⚠️ اليوم يوجد (${checkoutCount}) حالات خروج`;
+        } else {
+            alertBox.style.display = 'none';
+        }
+    }
+
+    // --- بقية الدوال ---
     function checkReportTimer() {
         const now = Date.now();
         const fourHours = 4 * 60 * 60 * 1000;
@@ -542,6 +726,7 @@
             alertBox.style.display = 'none';
         }
     }
+    
     setInterval(checkReportTimer, 60000);
 
     window.showGlassToast = function(msg, icon = '✅') {
@@ -563,7 +748,6 @@
 
     window.updateTopCounters = function(v1, v2, b1 = 0, b2 = 0) {
         if(v1 === undefined) { saveVacanciesToCloud(); return; }
-        
         const net1 = Math.max(0, (parseInt(v1) || 0) - (parseInt(b1) || 0));
         const net2 = Math.max(0, (parseInt(v2) || 0) - (parseInt(b2) || 0));
 
@@ -681,7 +865,6 @@
         window.saveVacanciesToCloud();
 
         const roomNum = document.getElementById('roomNumber').value;
-        
         if (!roomNum) {
             window.sendStatusWhatsapp();
             const reportData = { actionTime: new Date().toISOString(), isReport: true };
@@ -695,7 +878,7 @@
         const amt = document.getElementById('paidAmount').value;
 
         if(!checkIn || !nights || !amt) {
-            alert('يرجى استكمال بيانات الحجز');
+            alert('يرجى استكمال بيانات الحجز (التاريخ، الليالي، المبلغ)');
             return;
         }
 
@@ -747,7 +930,16 @@
             debt: document.getElementById('remainingAmount').value || 0
         };
 
-        push(transactionsRef, data);
+        // التعديل هنا: محاولة الارسال، وإذا فشل نحفظه محلياً للإعادة
+        push(transactionsRef, data)
+            .catch((error) => {
+                console.error('Failed to save:', error);
+                const failedOps = JSON.parse(localStorage.getItem('failed_operations') || '[]');
+                failedOps.push({ type: 'transaction', data: data, timestamp: Date.now() });
+                localStorage.setItem('failed_operations', JSON.stringify(failedOps));
+                showGlassToast('⚠️ تم حفظ البيانات محلياً وسيتم إرسالها لاحقاً', '📱');
+            });
+
         sendWhatsapp(data);
         
         this.reset();
@@ -757,7 +949,6 @@
         window.updateButtonState(); 
     });
 
-    // 1. رسالة الحجز
     window.sendWhatsapp = function(data) {
         let moneyDetails = `*💰 المدفوع:* ${data.amount} ريال`;
         if (data.totalContract > data.amount) {
@@ -801,7 +992,6 @@ ${moneyDetails}
         window.open(url, '_blank');
     }
 
-    // 2. رسالة الإشغال
     window.sendStatusWhatsapp = function() {
         const v1 = document.getElementById('vac1Input').value || 0;
         const v2 = document.getElementById('vac2Input').value || 0;
@@ -831,98 +1021,6 @@ ${moneyDetails}
 
         const url = `https://wa.me/?text=${encodeURIComponent(text.trim())}`;
         window.open(url, '_blank');
-    }
-
-    window.updateUI = function() {
-        const tbody = document.querySelector('#historyTable tbody');
-        tbody.innerHTML = '';
-        let currentCash = 0, currentNet = 0, checkoutCount = 0;
-        const todayStr = new Date().toLocaleDateString('en-GB');
-        let hasNew = false, hasPending = false;
-
-        transactions.forEach((t) => {
-            if (!t.roomNumber) return;
-
-            if (t.isHandedOver === false) hasNew = true;
-            if (t.isHandedOver === 'pending') hasPending = true;
-
-            if (t.isHandedOver !== true) {
-                const amt = parseFloat(t.amount || 0);
-                if (t.mixDetails) {
-                    currentCash += parseFloat(t.mixDetails.cash || 0);
-                    currentNet += parseFloat(t.mixDetails.net || 0);
-                } else {
-                    if(t.paymentMethod.includes('نقدى')) currentCash += amt;
-                    else currentNet += amt;
-                }
-            }
-            if (t.status === 'active' && t.checkOut === todayStr) checkoutCount++;
-
-            const row = document.createElement('tr');
-            let statusText = '';
-            if (t.isHandedOver === true) {
-                row.classList.add('handed-over'); statusText = '<span class="status-done">تم التوريد</span>';
-            } else if (t.isHandedOver === 'pending') {
-                row.classList.add('pending-approval'); statusText = '<span class="status-pending">⏳ انتظار</span>';
-            } else {
-                statusText = '<span class="status-new">🆕 جديد</span>';
-            }
-
-            let paymentDisplay = t.paymentMethod;
-            if (t.paymentMethod.includes('لم يؤكد')) {
-                paymentDisplay = `<span class="pending-transfer" onclick="toggleBankStatus('${t.firebaseKey}', '${t.paymentMethod}')">${t.paymentMethod}</span>`;
-            } else if (t.paymentMethod.includes('تم الاستلام')) {
-                paymentDisplay = `<span class="confirmed-transfer">${t.paymentMethod}</span>`;
-            }
-
-            const dateObj = new Date(t.checkIn);
-            let dateDisplay = t.checkIn;
-            if(!isNaN(dateObj)) {
-                const dayName = dateObj.toLocaleDateString('ar-EG', { weekday: 'long' });
-                const datePart = dateObj.toLocaleDateString('en-GB');
-                dateDisplay = `${datePart} ${dayName}`;
-            }
-
-            let roomDisplay = `<strong>${t.roomNumber}</strong><br><span style="font-size:9px; color:#94a3b8;">${t.roomTypeName}</span>`;
-            let btn = t.status === 'active' ? `<button class="btn-out" onclick="checkoutRoom('${t.firebaseKey}')">خروج</button>` : '✔';
-
-            row.innerHTML = `
-                <td>${roomDisplay}</td>
-                <td style="color:${t.isHandedOver === true ? 'inherit' : 'var(--header-bg)'}; font-weight:bold;">${t.amount}</td>
-                <td>${paymentDisplay}</td>
-                <td style="font-size:9px;">${dateDisplay}<br>${t.checkOut}</td>
-                <td style="font-size:10px; font-weight:bold;">${statusText}</td>
-                <td>${btn}</td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        document.getElementById('totalCash').innerText = currentCash;
-        document.getElementById('totalNet').innerText = currentNet;
-
-        const adminBtn = document.getElementById('adminBtn');
-        adminBtn.className = 'btn-action admin-btn'; 
-        if (hasPending) {
-            adminBtn.classList.add('btn-admin-orange');
-            adminBtn.innerHTML = '⏳ يوجد طلب توريد معلق (اضغط للاعتماد)';
-            adminBtn.disabled = false;
-        } else if (hasNew) {
-            adminBtn.classList.add('btn-admin-red');
-            adminBtn.innerHTML = '⚠️ يوجد مبالغ لم تطلب (تنبيه)';
-            adminBtn.disabled = true;
-        } else {
-            adminBtn.classList.add('btn-admin-gray');
-            adminBtn.innerHTML = '✅ العهدة صفر (لا يوجد توريد)';
-            adminBtn.disabled = true;
-        }
-
-        const alertBox = document.getElementById('checkoutAlert');
-        if (checkoutCount > 0) {
-            alertBox.style.display = 'block';
-            alertBox.innerText = `⚠️ اليوم يوجد (${checkoutCount}) حالات خروج`;
-        } else {
-            alertBox.style.display = 'none';
-        }
     }
 
     window.deleteHandedOver = function() { if(confirm('حذف جميع السجلات الموردة للإدارة؟')) transactions.forEach(t => { if(t.isHandedOver === true) remove(ref(db, `transactions/${t.firebaseKey}`)); }); }
@@ -969,6 +1067,11 @@ ${moneyDetails}
     togglePaymentSections();
     updateButtonState();
 
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW register failed', err));
+}
 </script>
 
 </body>
