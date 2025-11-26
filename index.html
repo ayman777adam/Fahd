@@ -390,14 +390,16 @@
                 </div>
 
                 <div id="mixedSection" class="mixed-section full-width">
-                    <div class="form-grid">
-                        <div>
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr;"> <div>
                             <label style="color:#16a34a">مبلغ النقدى</label>
                             <input type="number" id="mixedCash" oninput="calculateMixedTotal()">
                         </div>
                         <div>
                             <label style="color:#8b5cf6">مبلغ الشبكة</label>
                             <input type="number" id="mixedNet" oninput="calculateMixedTotal()">
+                        </div>
+                        <div>
+                            <label style="color:#1d4ed8;">مبلغ التحويل</label> <input type="number" id="mixedBank" oninput="calculateMixedTotal()">
                         </div>
                     </div>
                 </div>
@@ -688,6 +690,7 @@
                 if (t.mixDetails) {
                     currentCash += parseFloat(t.mixDetails.cash || 0);
                     currentNet += parseFloat(t.mixDetails.net || 0);
+                    currentNet += parseFloat(t.mixDetails.bank || 0); // إضافة مبلغ التحويل إلى النت
                 } else {
                     if(t.paymentMethod.includes('نقدى')) currentCash += amt;
                     else currentNet += amt;
@@ -890,7 +893,8 @@
     window.calculateMixedTotal = function() {
         const c = parseFloat(document.getElementById('mixedCash').value) || 0;
         const n = parseFloat(document.getElementById('mixedNet').value) || 0;
-        document.getElementById('paidAmount').value = c + n;
+        const b = parseFloat(document.getElementById('mixedBank').value) || 0; // إضافة التحويل
+        document.getElementById('paidAmount').value = c + n + b; // جمع الثلاثة
         window.calculateRemaining();
     }
 
@@ -976,8 +980,9 @@
         } else if(pMethod === 'مختلط') {
             const c = parseFloat(document.getElementById('mixedCash').value) || 0;
             const n = parseFloat(document.getElementById('mixedNet').value) || 0;
-            mixDetails = { cash: c, net: n };
-            finalPayMethod = `مختلط (${c} كاش + ${n} شبكة)`;
+            const b = parseFloat(document.getElementById('mixedBank').value) || 0; // التحويل
+            mixDetails = { cash: c, net: n, bank: b }; // تحديث mixDetails
+            finalPayMethod = `مختلط (${c} كاش + ${n} شبكة + ${b} تحويل)`; // تحديث نص الدفع
         }
 
         const data = {
