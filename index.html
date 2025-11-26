@@ -211,6 +211,11 @@
         .col-date { width: 20%; font-size: 9px; color: #64748b; }
         .col-stat { width: 10%; font-weight: bold; font-size: 10px; }
         .col-act { width: 15%; }
+        
+        /* تحديث ستايل الحالة عند وجود رابط معاينة */
+        .confirmed-transfer.pending-transfer { color: #059669; cursor: pointer; text-decoration: underline; font-weight: bold; }
+        .confirmed-transfer.pending-transfer:hover { text-decoration: none; background-color: #ecfdf5; border-radius: 4px; }
+
 
         .status-new { color: var(--danger-color); }
         .status-pending { color: var(--warning-color); }
@@ -495,6 +500,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBY09i3QHvaZFmNpOUHYEIFoU_3dJvycso",
@@ -506,10 +512,11 @@
       appId: "1:134497063312:web:d8f589f291d55a85a2e315"
     };
 
-    let app, db;
+    let app, db, storage;
     try {
         app = initializeApp(firebaseConfig);
         db = getDatabase(app);
+        storage = getStorage(app); // تهيئة Firebase Storage
     } catch(e) {
         document.getElementById('loaderText').innerHTML = "<div style='color:red'>خطأ في تهيئة النظام!</div>";
         document.getElementById('forceOpenBtn').style.display = 'block';
@@ -579,7 +586,9 @@
             if (t.paymentMethod.includes('لم يؤكد')) {
                 paymentDisplay = `<span class="pending-transfer" onclick="toggleBankStatus('${t.firebaseKey}', '${t.paymentMethod}')">${t.paymentMethod}</span>`;
             } else if (t.paymentMethod.includes('تم الاستلام')) {
-                paymentDisplay = `<span class="confirmed-transfer">${t.paymentMethod}</span>`;
+                // تعديل: إضافة onclick لفتح الإيصال
+                const statusClass = t.receiptURL ? 'confirmed-transfer pending-transfer' : 'confirmed-transfer'; // pending-transfer لإضافة ستايل الضغط
+                paymentDisplay = `<span class="${statusClass}" onclick="showReceipt('${t.receiptURL || ''}')">${t.paymentMethod}</span>`;
             }
 
             const dateObj = new Date(t.checkIn);
@@ -896,7 +905,7 @@
         }
     }
 
-    document.getElementById('checkinForm').addEventListener('submit', function(e) {
+    document.getElementById('checkinForm').addEventListener('submit', async function(e) { // إضافة async هنا
         e.preventDefault();
         window.saveVacanciesToCloud();
 
@@ -918,20 +927,37 @@
             return;
         }
         
-        // [START] Required Upload Check (تعديل 3)
+        // [START] File Upload Logic
+        let receiptURL = null;
         const pMethod = document.getElementById('paymentMethod').value;
         const bStatus = (pMethod === 'تحويل') ? document.getElementById('bankStatusSelect').value : null;
-        
-        if(bStatus === 'confirmed') {
-            const cameraFile = document.getElementById('cameraInput').files.length;
-            const generalFile = document.getElementById('fileInput').files.length;
-            
-            if (cameraFile === 0 && generalFile === 0) {
+
+        if (bStatus === 'confirmed') {
+            const cameraFile = document.getElementById('cameraInput').files[0];
+            const generalFile = document.getElementById('fileInput').files[0];
+            const fileToUpload = cameraFile || generalFile;
+
+            if (!fileToUpload) {
                 alert('⚠️ يجب إرفاق إيصال التحويل (صورة من الكاميرا أو ملف) لحالة "تم الاستلام".');
                 return;
             }
+
+            showGlassToast('⏳ جاري رفع الإيصال... يرجى الانتظار', '📤');
+            
+            try {
+                const uniqueFileName = `${Date.now()}_${fileToUpload.name}`;
+                const storageReference = storageRef(storage, `receipts/${uniqueFileName}`);
+                const snapshot = await uploadBytes(storageReference, fileToUpload);
+                receiptURL = await getDownloadURL(snapshot.ref);
+                showGlassToast('✅ تم رفع الإيصال بنجاح', '✅');
+            } catch (error) {
+                console.error("Upload failed:", error);
+                alert(`فشل رفع الإيصال: ${error.message}`);
+                showGlassToast('❌ فشل الرفع!', '❌');
+                return;
+            }
         }
-        // [END] Required Upload Check
+        // [END] File Upload Logic
 
         window.calculateRemaining();
 
@@ -975,7 +1001,8 @@
             status: 'active',
             isHandedOver: false,
             totalContract: document.getElementById('totalRentAmount').value || 0,
-            debt: document.getElementById('remainingAmount').value || 0
+            debt: document.getElementById('remainingAmount').value || 0,
+            receiptURL: receiptURL // إضافة رابط الإيصال
         };
 
         // التعديل هنا: محاولة الارسال، وإذا فشل نحفظه محلياً للإعادة
@@ -1081,6 +1108,17 @@ ${recommendation}
     window.requestHandover = function() { if(!transactions.some(t => t.isHandedOver === false)) { alert('لا توجد مبالغ.'); return; } if(confirm('طلب توريد؟')) { const updates = {}; transactions.forEach(t => { if(t.isHandedOver === false) updates[`transactions/${t.firebaseKey}/isHandedOver`] = 'pending'; }); update(ref(db), updates); showGlassToast('تم الطلب', '🚀'); } }
     window.approveHandover = function() { if(!transactions.some(t => t.isHandedOver === 'pending')) return; const pin = prompt("أدخل كود المدير:"); if(pin === 'fahd5') { const updates = {}; transactions.forEach(t => { if(t.isHandedOver === 'pending') updates[`transactions/${t.firebaseKey}/isHandedOver`] = true; }); update(ref(db), updates); showGlassToast('تم الاعتماد', '💰'); } else { alert('خطأ'); } }
     window.checkoutRoom = function(k) { if(confirm('خروج؟')) update(ref(db, `transactions/${k}`), { status: 'completed' }); }
+    
+    // [START] New Show Receipt Function
+    window.showReceipt = function(url) {
+        if (!url || url === 'null') {
+            showGlassToast('❌ لا يوجد إيصال مرفق لهذه العملية.', 'ℹ️');
+            return;
+        }
+        window.open(url, '_blank');
+    }
+    // [END] New Show Receipt Function
+
     window.toggleBankStatus = function(k, s) { if(s.includes('لم يؤكد') && confirm('تأكيد؟')) update(ref(db, `transactions/${k}`), { paymentMethod: s.replace('لم يؤكد ⏳', 'تم الاستلام ✅') }); }
     
     window.exportToExcel = function() { 
