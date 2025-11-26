@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة إيجار يومي شهري مختلط - V24</title>
+    <title>منظومة إيجار يومي شهري مختلط - V27</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
@@ -18,6 +18,7 @@
             --success-color: #10b981;
             --warning-color: #f59e0b;
             --booking-blue: #003580;
+            --status-btn-color: #3b82f6;
             --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
@@ -35,11 +36,8 @@
 
         .container { max-width: 600px; margin: 0 auto; position: relative; z-index: 1; }
 
-        /* إخفاء مؤشرات الأرقام */
         input[type=number]::-webkit-outer-spin-button,
-        input[type=number]::-webkit-inner-spin-button {
-            -webkit-appearance: none; margin: 0;
-        }
+        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
         #loader { 
@@ -113,10 +111,8 @@
         }
         .card-yellow { background-color: #fef9c3; border-color: #facc15; }
         .card-red { background-color: #fee2e2; border-color: #ef4444; }
-        
         .counter { font-size: 28px; font-weight: 800; color: var(--header-bg); }
         .card-red .counter { color: #dc2626; }
-        
         .status-card h3 { margin: 0; font-size: 11px; color: #64748b; }
         .status-detail { font-size: 10px; color: #94a3b8; margin-top: 4px; font-family: monospace; }
 
@@ -141,18 +137,16 @@
         .bank-section { display: none; background: #eff6ff; border: 1px solid #bfdbfe; padding: 10px; border-radius: 8px; margin-top: 10px; }
         
         .vacancy-input { text-align: center; color: var(--success-color); font-weight: bold; font-size: 16px; }
-        .booking-input { 
-            text-align: center; color: var(--booking-blue); font-weight: bold; font-size: 16px; 
-            border-color: #93c5fd; background: #eff6ff; 
-        }
+        .booking-input { text-align: center; color: var(--booking-blue); font-weight: bold; font-size: 16px; border-color: #93c5fd; background: #eff6ff; }
         .booking-label { color: var(--booking-blue); display: flex; align-items: center; gap: 5px; }
         .booking-icon { background-color: var(--booking-blue); color: white; border-radius: 3px; padding: 0 4px; font-weight: bold; font-size: 10px; font-family: sans-serif; }
         
         .btn-whatsapp {
             background: #25D366; color: white; border: none; padding: 14px; border-radius: 10px;
             font-size: 15px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 20px;
-            display: flex; justify-content: center; align-items: center; gap: 8px;
+            display: flex; justify-content: center; align-items: center; gap: 8px; transition: background 0.3s;
         }
+        .btn-status-mode { background: var(--status-btn-color) !important; }
 
         #checkoutAlert {
             display: none; background-color: var(--alert-bg); color: var(--alert-text);
@@ -290,15 +284,15 @@
                 </div>
                 <div>
                     <label>الليالي</label>
-                    <input type="number" id="nightsCount" min="1" placeholder="..." required oninput="calculateCheckout()">
+                    <input type="number" id="nightsCount" min="1" placeholder="..." required oninput="calculateDailyTotal()">
                 </div>
                 <div class="full-width">
                     <label>الخروج</label>
                     <input type="text" id="checkOutDate" class="readonly-field" readonly>
                 </div>
                 <div>
-                    <label>رقم الغرفة</label>
-                    <input type="number" id="roomNumber" required placeholder="101">
+                    <label>رقم الغرفة (اتركه فارغاً لإرسال تقرير فقط)</label>
+                    <input type="number" id="roomNumber" placeholder="101" oninput="updateButtonState()">
                 </div>
                 <div>
                     <label>نوع الغرفة</label>
@@ -311,13 +305,19 @@
 
             <hr style="border:0; border-top:1px dashed #e2e8f0; margin: 15px 0;">
 
-            <!-- القسم المالي الموحد -->
+            <!-- القسم المالي المتغير -->
             <div class="finance-group">
                 <div class="finance-label" id="financeLabel">تفاصيل الإيجار</div>
                 <div class="form-grid">
+                    <!-- خانة إيجار اليوم الواحد (لليومي فقط) -->
+                    <div id="dailyRateDiv">
+                        <label style="color:var(--booking-blue)">إيجار اليوم الواحد</label>
+                        <input type="number" id="dailyRate" placeholder="سعر الليلة" oninput="calculateDailyTotal()">
+                    </div>
+
                     <div class="full-width">
-                        <label>الإجمالي المتفق عليه</label>
-                        <input type="number" id="totalRentAmount" placeholder="المبلغ الكلي" oninput="calculateRemaining()">
+                        <label>الإجمالي (تلقائي)</label>
+                        <input type="number" id="totalRentAmount" placeholder="يتم الحساب تلقائياً" oninput="calculateRemaining()">
                     </div>
                     <div>
                         <label>المدفوع الآن</label>
@@ -371,25 +371,25 @@
                     <div class="form-grid">
                         <div>
                             <label style="color:var(--success-color)">إجمالي الشاغر (غرفة وصالة)</label>
-                            <input type="number" id="vac1Input" class="vacancy-input" oninput="updateTopCounters()" placeholder="العدد">
+                            <input type="number" id="vac1Input" class="vacancy-input" onfocus="this.value=''" oninput="updateTopCounters()" placeholder="العدد">
                         </div>
                         <div>
                             <label style="color:var(--success-color)">إجمالي الشاغر (غرفتين)</label>
-                            <input type="number" id="vac2Input" class="vacancy-input" oninput="updateTopCounters()" placeholder="العدد">
+                            <input type="number" id="vac2Input" class="vacancy-input" onfocus="this.value=''" oninput="updateTopCounters()" placeholder="العدد">
                         </div>
                         <div>
                             <label class="booking-label"><span class="booking-icon">B.</span> حجوزات مؤكدة (غرفة وصالة)</label>
-                            <input type="number" id="book1Input" class="booking-input" oninput="updateTopCounters()" placeholder="Booking.com">
+                            <input type="number" id="book1Input" class="booking-input" onfocus="this.value=''" oninput="updateTopCounters()" placeholder="Booking.com">
                         </div>
                         <div>
                             <label class="booking-label"><span class="booking-icon">B.</span> حجوزات مؤكدة (غرفتين)</label>
-                            <input type="number" id="book2Input" class="booking-input" oninput="updateTopCounters()" placeholder="Booking.com">
+                            <input type="number" id="book2Input" class="booking-input" onfocus="this.value=''" oninput="updateTopCounters()" placeholder="Booking.com">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <button type="submit" class="btn-whatsapp" id="saveBtn">حفظ وإرسال 📱</button>
+            <button type="submit" class="btn-whatsapp btn-status-mode" id="saveBtn">إرسال تقرير الإشغال 📝</button>
         </form>
     </div>
 
@@ -522,14 +522,48 @@
 
     window.toggleRentType = function() {
         const type = document.getElementById('rentType').value;
+        const totalInput = document.getElementById('totalRentAmount');
+        const dailyRateDiv = document.getElementById('dailyRateDiv');
+        const nightsInput = document.getElementById('nightsCount');
+
         document.getElementById('financeLabel').innerText = (type === 'شهري') ? 'تفاصيل العقد الشهري' : 'تفاصيل الإيجار اليومي';
         
-        const nights = document.getElementById('nightsCount');
         if (type === 'شهري') {
-            nights.value = 30; nights.readOnly = true; nights.style.backgroundColor = "#e2e8f0";
+            dailyRateDiv.style.display = 'none'; // إخفاء سعر الليلة
+            totalInput.readOnly = false; // فتح الإجمالي للكتابة
+            totalInput.style.backgroundColor = "#f8fafc";
+            totalInput.value = '';
+            
+            nightsInput.value = 30; 
+            nightsInput.readOnly = true; 
+            nightsInput.style.backgroundColor = "#e2e8f0";
         } else {
-            nights.value = ''; nights.readOnly = false; nights.style.backgroundColor = "#f8fafc";
+            dailyRateDiv.style.display = 'block'; // إظهار سعر الليلة
+            totalInput.readOnly = true; // قفل الإجمالي (حساب تلقائي)
+            totalInput.style.backgroundColor = "#e2e8f0";
+            totalInput.value = '';
+            
+            nightsInput.value = ''; 
+            nightsInput.readOnly = false; 
+            nightsInput.style.backgroundColor = "#f8fafc";
         }
+        window.calculateCheckout();
+    }
+
+    // دالة حساب إيجار اليوم الواحد (جديدة)
+    window.calculateDailyTotal = function() {
+        // التأكد من أن الوضع يومي قبل الحساب
+        if (document.getElementById('rentType').value !== 'يومي') return;
+
+        const rate = parseFloat(document.getElementById('dailyRate').value) || 0;
+        const nights = parseFloat(document.getElementById('nightsCount').value) || 0;
+        
+        // الحساب: السعر * الليالي
+        const total = rate * nights;
+        document.getElementById('totalRentAmount').value = total;
+        
+        // تحديث المتبقي والخروج
+        window.calculateRemaining();
         window.calculateCheckout();
     }
 
@@ -579,8 +613,38 @@
         document.getElementById('checkOutDate').value = d.toLocaleDateString('en-GB');
     }
 
+    window.updateButtonState = function() {
+        const roomNum = document.getElementById('roomNumber').value;
+        const btn = document.getElementById('saveBtn');
+        
+        if (!roomNum) {
+            btn.innerText = "إرسال تقرير الإشغال 📝";
+            btn.classList.add('btn-status-mode');
+            btn.style.backgroundColor = '#3b82f6';
+        } else {
+            btn.innerText = "حفظ وإرسال 📱";
+            btn.classList.remove('btn-status-mode');
+            btn.style.backgroundColor = '#25D366';
+        }
+    }
+
     document.getElementById('checkinForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        
+        window.saveVacanciesToCloud();
+
+        const roomNum = document.getElementById('roomNumber').value;
+        
+        if (!roomNum) {
+            window.sendStatusWhatsapp();
+            showGlassToast('تم تحديث الحالة وإرسال التقرير 📝', 'ℹ️');
+            return;
+        }
+
+        const amt = document.getElementById('paidAmount').value;
+        // السماح بـ 0 إذا كان دين كامل، لكن يفضل التنبيه
+        // if(!amt) { alert('يرجى إدخال المبلغ المدفوع'); return; }
+
         window.calculateRemaining();
 
         const rTypeInput = document.getElementById('roomTypeInput').value;
@@ -611,7 +675,7 @@
 
         const data = {
             id: Date.now(),
-            roomNumber: document.getElementById('roomNumber').value,
+            roomNumber: roomNum,
             roomType: rTypeInput,
             roomTypeName: (rTypeInput === '1bhk') ? 'غرفة وصالة' : 'غرفتين',
             bookingSource: document.getElementById('bookingSource').value,
@@ -636,22 +700,27 @@
         window.setupDateDropdown();
         window.toggleRentType();
         window.togglePaymentSections();
+        window.updateButtonState(); 
     });
 
     window.sendWhatsapp = function(data) {
-        let moneyDetails = `*💰 المبلغ:* ${data.amount} ريال`;
+        let moneyDetails = `*💰 المدفوع:* ${data.amount} ريال`;
         if (data.totalContract > data.amount) {
             moneyDetails += `\n*📉 الإجمالي:* ${data.totalContract}\n*⚠️ المتبقي:* ${data.debt}`;
         }
 
         const v1 = document.getElementById('vac1Input').value;
         const v2 = document.getElementById('vac2Input').value;
+        const b1 = document.getElementById('book1Input').value;
+        const b2 = document.getElementById('book2Input').value;
         
-        // تحويل التاريخ للأرقام العربية (الشرقية) مع اسم اليوم
+        const net1 = Math.max(0, (v1||0) - (b1||0));
+        const net2 = Math.max(0, (v2||0) - (b2||0));
+
         const dateObj = new Date(data.checkIn);
         const dateStr = dateObj.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' });
         
-        const checkOutObj = new Date(data.checkOut.split('/').reverse().join('-')); // تحويل DD/MM/YYYY لـ Date
+        const checkOutObj = new Date(data.checkOut.split('/').reverse().join('-'));
         let checkOutStr = data.checkOut;
         if(!isNaN(checkOutObj)) {
              checkOutStr = checkOutObj.toLocaleDateString('ar-EG', { year: 'numeric', month: 'numeric', day: 'numeric' });
@@ -660,17 +729,47 @@
         const timeObj = new Date(data.actionTime);
         const timeStr = timeObj.toLocaleString('ar-EG');
 
-        const text = `*تقرير إيجار غرفة ${data.roomNumber} - ${data.roomTypeName}*
+        const text = `تقرير إيجار غرفة ${data.roomNumber} - ${data.roomTypeName}
 ----------------------------
-*نوع العقد:* ${data.rentType} (${data.bookingSource})
+نوع العقد: ${data.rentType} (${data.bookingSource})
 ${moneyDetails}
-*🗓️ الدخول:* ${dateStr}
-*🌙 المدة:* ${data.nights} ليالي
-*📤 الخروج:* ${checkOutStr}
-*💳 الدفع:* ${data.paymentMethod}
-*🔢 الشاغر:* ${v1} غرف وصاله  |  ${v2} غرفتين 
+🗓️ الدخول: ${dateStr}
+🌙 المدة: ${data.nights} ليالي
+📤 الخروج: ${checkOutStr}
+💳 الدفع: ${data.paymentMethod}
+🔢 الشاغر: ${net1} غرف وصاله  |  ${net2} غرفتين
+محجوز بوكينج : ${b1} غرفه وصاله و ${b2} غرفتين
 ----------------------------
-*🕒:* ${timeStr}`;
+🕒: ${timeStr}`;
+
+        const url = `https://wa.me/?text=${encodeURIComponent(text.trim())}`;
+        window.open(url, '_blank');
+    }
+
+    window.sendStatusWhatsapp = function() {
+        const v1 = document.getElementById('vac1Input').value || 0;
+        const v2 = document.getElementById('vac2Input').value || 0;
+        const b1 = document.getElementById('book1Input').value || 0;
+        const b2 = document.getElementById('book2Input').value || 0;
+        
+        const net1 = Math.max(0, v1 - b1);
+        const net2 = Math.max(0, v2 - b2);
+        
+        const now = new Date().toLocaleString('ar-EG');
+
+        const text = `*📊 تقرير حالة الإشغال الحالي*
+----------------------------
+*🏠 غرفة وصالة:*
+- إجمالي الشاغر: ${v1}
+- حجوزات بوكينج: ${b1}
+✅ *المتاح للبيع:* ${net1}
+
+*🏠 غرفتين:*
+- إجمالي الشاغر: ${v2}
+- حجوزات بوكينج: ${b2}
+✅ *المتاح للبيع:* ${net2}
+----------------------------
+*🕒:* ${now}`;
 
         const url = `https://wa.me/?text=${encodeURIComponent(text.trim())}`;
         window.open(url, '_blank');
@@ -769,7 +868,7 @@ ${moneyDetails}
     window.deleteHandedOver = function() { if(confirm('حذف جميع السجلات الموردة للإدارة؟')) transactions.forEach(t => { if(t.isHandedOver === true) remove(ref(db, `transactions/${t.firebaseKey}`)); }); }
     window.deleteExpired = function() { if(confirm('حذف الحجوزات المنتهية؟')) transactions.forEach(t => { if(t.status === 'completed') remove(ref(db, `transactions/${t.firebaseKey}`)); }); }
     window.requestHandover = function() { if(!transactions.some(t => t.isHandedOver === false)) { alert('لا توجد مبالغ.'); return; } if(confirm('طلب توريد؟')) { const updates = {}; transactions.forEach(t => { if(t.isHandedOver === false) updates[`transactions/${t.firebaseKey}/isHandedOver`] = 'pending'; }); update(ref(db), updates); showGlassToast('تم الطلب', '🚀'); } }
-    window.approveHandover = function() { if(!transactions.some(t => t.isHandedOver === 'pending')) return; const pin = prompt("أدخل كود المدير:"); if(pin === 'fahd') { const updates = {}; transactions.forEach(t => { if(t.isHandedOver === 'pending') updates[`transactions/${t.firebaseKey}/isHandedOver`] = true; }); update(ref(db), updates); showGlassToast('تم الاعتماد', '💰'); } else { alert('خطأ'); } }
+    window.approveHandover = function() { if(!transactions.some(t => t.isHandedOver === 'pending')) return; const pin = prompt("أدخل كود المدير:"); if(pin === 'fahd5') { const updates = {}; transactions.forEach(t => { if(t.isHandedOver === 'pending') updates[`transactions/${t.firebaseKey}/isHandedOver`] = true; }); update(ref(db), updates); showGlassToast('تم الاعتماد', '💰'); } else { alert('خطأ'); } }
     window.checkoutRoom = function(k) { if(confirm('خروج؟')) update(ref(db, `transactions/${k}`), { status: 'completed' }); }
     window.toggleBankStatus = function(k, s) { if(s.includes('لم يؤكد') && confirm('تأكيد؟')) update(ref(db, `transactions/${k}`), { paymentMethod: s.replace('لم يؤكد ⏳', 'تم الاستلام ✅') }); }
     
@@ -808,6 +907,7 @@ ${moneyDetails}
     setupDateDropdown();
     toggleRentType();
     togglePaymentSections();
+    updateButtonState();
 
 </script>
 
