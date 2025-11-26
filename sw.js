@@ -1,4 +1,4 @@
-// sw.js — Instant Update Mode
+// sw.js — Stable Update Mode
 
 self.addEventListener('install', () => {
   self.skipWaiting();
@@ -8,9 +8,15 @@ self.addEventListener('activate', () => {
   clients.claim();
 });
 
-// منع أي كاش نهائياً — كل طلب يجيب أحدث ملف من السيرفر
+// طريقة Network First مع fallback بسيط
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    fetch(event.request, { cache: "no-store" })
+    fetch(event.request)
+      .then((response) => {
+        return response;
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
   );
 });
