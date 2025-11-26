@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة إيجار يومي شهري مختلط - Online</title>
+    <title>منظومة إيجار يومي شهري مختلط - V19</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
 
         :root {
             --header-bg: #334155; 
@@ -16,9 +16,7 @@
             --text-color: #1e293b;
             --danger-color: #ef4444;
             --success-color: #10b981;
-            --pending-color: #f59e0b;
-            --alert-bg: #fff3cd;
-            --alert-text: #856404;
+            --warning-color: #f59e0b;
             --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
@@ -26,43 +24,63 @@
             font-family: 'Tajawal', sans-serif;
             background-color: var(--bg-color);
             background-image: 
-                repeating-linear-gradient(45deg, #d4af37 0, #d4af37 1px, transparent 0, transparent 50px),
-                repeating-linear-gradient(-45deg, #d4af37 0, #d4af37 1px, transparent 0, transparent 50px);
+                repeating-linear-gradient(45deg, rgba(212, 175, 55, 0.03) 0, rgba(212, 175, 55, 0.03) 1px, transparent 0, transparent 50px),
+                repeating-linear-gradient(-45deg, rgba(212, 175, 55, 0.03) 0, rgba(212, 175, 55, 0.03) 1px, transparent 0, transparent 50px);
             background-size: 71px 71px;
             background-attachment: fixed;
             margin: 0; padding: 15px; color: var(--text-color);
-            padding-bottom: 80px;
+            padding-bottom: 50px; /* مسافة للشريط المصغر */
         }
 
         .container { max-width: 600px; margin: 0 auto; position: relative; z-index: 1; }
 
+        /* Loader */
         #loader { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(255,255,255,0.98); z-index: 99999;
             display: flex; justify-content: center; align-items: center;
-            font-family: 'Cairo', sans-serif; font-size: 18px; color: var(--header-bg);
+            font-family: 'Cairo', sans-serif; font-size: 16px; color: var(--header-bg);
             flex-direction: column; gap: 10px;
         }
 
+        /* Header */
         .main-header {
-            background: var(--header-bg); color: white; padding: 20px; border-radius: 12px;
+            background: var(--header-bg); color: white; padding: 15px; border-radius: 12px;
             text-align: center; margin-bottom: 20px; box-shadow: var(--shadow-soft);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        .header-content h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
+        .header-content h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
 
+        /* Footer المصغر */
         .fixed-footer {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 50px;
-            background-color: #e5e7eb;
-            background-image: repeating-linear-gradient(45deg, #d1d5db 0px, #d1d5db 1px, transparent 1px, transparent 10px);
-            border-top: 2px solid #94a3b8;
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 30px; /* تصغير الارتفاع */
+            background-color: #f1f5f9;
+            border-top: 1px solid #cbd5e1;
             display: flex; justify-content: center; align-items: center; z-index: 9999;
         }
         .fixed-footer-text {
-            font-family: 'Cairo', sans-serif; font-size: 14px; color: #000000; font-weight: 700;
-            background: rgba(255,255,255,0.8); padding: 5px 15px; border-radius: 20px;
+            font-family: 'Cairo', sans-serif; font-size: 10px; color: #475569; font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
+        /* Toast Notification (رسالة زجاجية) */
+        #toast-container {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 10000; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+        }
+        .glass-toast {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 20px 30px; border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            text-align: center; font-family: 'Cairo', sans-serif;
+            color: var(--header-bg); font-weight: 700; font-size: 16px;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        .glass-icon { font-size: 40px; margin-bottom: 5px; }
+
+        /* Cards */
         .finance-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .finance-card {
             background: white; padding: 12px; border-radius: 10px; text-align: center;
@@ -73,20 +91,35 @@
         .finance-card.net { border-top-color: #8b5cf6; }
         .finance-card.net .finance-val { color: #8b5cf6; }
 
-        .admin-btn {
-            background: linear-gradient(to right, #374151, #111827); color: #ffd700;
-            border: 1px solid #ffd700; grid-column: span 3; margin-top: 5px;
-        }
-
+        /* Buttons */
         .action-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
         .btn-action {
             border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;
             color: white; font-family: 'Tajawal'; font-size: 11px; display: flex; flex-direction: column;
-            align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s;
         }
-        .btn-close { background: #f59e0b; color: #fff; }
+        .btn-close { background: #3b82f6; }
         .btn-print { background: #d97706; }
         .btn-excel { background: #059669; }
+
+        /* زر الاعتماد الذكي */
+        .admin-btn {
+            grid-column: span 3; margin-top: 5px; padding: 12px; font-size: 14px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        /* حالات الزر */
+        .btn-admin-red { 
+            background: linear-gradient(45deg, #dc2626, #ef4444); color: white;
+            animation: none; 
+        }
+        .btn-admin-orange { 
+            background: linear-gradient(45deg, #d97706, #f59e0b); color: white;
+            animation: pulse-orange 2s infinite;
+        }
+        .btn-admin-gray { 
+            background: #e2e8f0; color: #94a3b8; cursor: default;
+        }
+        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
 
         .status-header { display: flex; gap: 10px; margin-bottom: 20px; }
         .status-card {
@@ -151,15 +184,19 @@
         .col-amt { width: 15%; font-weight: bold; color: var(--header-bg); }
         .col-pay { width: 25%; font-size: 10px; }
         .col-date { width: 20%; font-size: 9px; color: #64748b; }
-        .col-stat { width: 10%; }
+        .col-stat { width: 10%; font-weight: bold; font-size: 10px; }
         .col-act { width: 15%; }
+
+        /* حالات الترحيل في الجدول */
+        .status-new { color: var(--danger-color); }
+        .status-pending { color: var(--warning-color); }
+        .status-done { color: var(--success-color); }
 
         .pending-transfer { color: var(--danger-color); cursor: pointer; text-decoration: underline; font-weight: bold; }
         .confirmed-transfer { color: var(--success-color); font-weight: bold; }
 
-        .status-icon { font-size: 14px; }
         tr.handed-over { background-color: #f8fafc; opacity: 0.6; }
-        tr.pending-approval { background-color: #fff7ed; border-right: 4px solid var(--pending-color); }
+        tr.pending-approval { background-color: #fffbeb; }
         
         .btn-out { background: var(--danger-color); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; }
 
@@ -167,12 +204,18 @@
             body * { visibility: hidden; }
             .history-box, .history-box * { visibility: visible; }
             .history-box { position: absolute; left: 0; top: 0; width: 100%; padding: 0; background: white; box-shadow: none; }
-            .history-header, #checkoutAlert, .admin-btn { display: none; }
-            tr.handed-over, button, .btn-out, .action-buttons, .form-box, .status-header, .finance-section, .main-header, .fixed-footer { display: none !important; }
+            
+            /* إظهار حقوق المطور في الطباعة */
+            .fixed-footer { position: relative; visibility: visible; border: none; background: none; margin-top: 20px; width: 100%; text-align: center; }
+            .fixed-footer-text { background: none; font-size: 12pt; color: #000; }
+
+            .history-header, #checkoutAlert, .admin-btn, .del-buttons, #saveBtn, .action-buttons { display: none !important; }
+            tr.handed-over, button { display: none !important; }
+            
             table { border: 1px solid #000; width: 100%; direction: rtl; border-collapse: collapse; }
             th, td { border: 1px solid #000; padding: 5px; color: #000; text-align: center; font-size: 10pt; }
             th { background: #eee !important; -webkit-print-color-adjust: exact; }
-            .history-box::before { content: "تقرير العمليات الغير مرحلة"; display: block; text-align: center; font-size: 16pt; font-weight: bold; margin-bottom: 10px; }
+            .history-box::before { content: "تقرير إيراد الورديـة"; display: block; text-align: center; font-size: 18pt; font-weight: bold; margin-bottom: 15px; }
         }
     </style>
 </head>
@@ -181,6 +224,14 @@
 <div id="loader">
     <div>⏳</div>
     <div>جاري الاتصال بالسيرفر...</div>
+</div>
+
+<!-- حاوية الإشعارات الزجاجية -->
+<div id="toast-container">
+    <div class="glass-toast" id="toastMsg">
+        <span class="glass-icon" id="toastIcon">✅</span>
+        <span id="toastText">تمت العملية بنجاح</span>
+    </div>
 </div>
 
 <div class="container">
@@ -203,9 +254,13 @@
 
     <div class="action-buttons">
         <button class="btn-action btn-close" onclick="requestHandover()">✋ طلب توريد (للموظف)</button>
-        <button class="btn-action btn-print" onclick="window.print()">🖨️ طباعة</button>
-        <button class="btn-action btn-excel" onclick="exportToExcel()">📊 اكسيل</button>
-        <button class="btn-action admin-btn" onclick="approveHandover()">🔑 اعتماد التوريد (للإدارة)</button>
+        <button class="btn-action btn-print" onclick="window.print()">🖨️ طباعة تقرير الإيراد</button>
+        <button class="btn-action btn-excel" onclick="exportToExcel()">📊 تصدير كل العمليات</button>
+        
+        <!-- زر الاعتماد التفاعلي -->
+        <button id="adminBtn" class="btn-action admin-btn btn-admin-gray" onclick="approveHandover()">
+            🔑 لا يوجد مبالغ للتوريد
+        </button>
     </div>
 
     <div class="status-header">
@@ -315,7 +370,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn-whatsapp">حفظ وإرسال 📱</button>
+            <button type="submit" class="btn-whatsapp" id="saveBtn">حفظ وإرسال 📱</button>
         </form>
     </div>
 
@@ -325,7 +380,7 @@
         <div class="history-header">
             <h3>سجل العمليات</h3>
             <div class="del-buttons">
-                <button class="btn-mini-del btn-del-handed" onclick="deleteHandedOver()">🗑️ حذف المرحل</button>
+                <button class="btn-mini-del btn-del-handed" onclick="deleteHandedOver()">🗑️ حذف المورد للإدارة</button>
                 <button class="btn-mini-del btn-del-expired" onclick="deleteExpired()">⏳ حذف المنتهي</button>
             </div>
         </div>
@@ -336,7 +391,7 @@
                     <th class="col-amt">المبلغ</th>
                     <th class="col-pay">طريقة الدفع</th>
                     <th class="col-date">التاريخ</th>
-                    <th class="col-stat">مرحل</th>
+                    <th class="col-stat">ترحيل</th>
                     <th class="col-act">خروج</th>
                 </tr>
             </thead>
@@ -397,6 +452,20 @@
         document.getElementById('vac2Input').value = data.v2;
         updateTopCounters(data.v1, data.v2);
     });
+
+    // --- دوال العرض والتنبيهات الزجاجية ---
+    window.showGlassToast = function(msg, icon = '✅') {
+        const container = document.getElementById('toast-container');
+        document.getElementById('toastText').innerText = msg;
+        document.getElementById('toastIcon').innerText = icon;
+        container.style.opacity = '1';
+        container.style.pointerEvents = 'auto';
+        
+        setTimeout(() => {
+            container.style.opacity = '0';
+            container.style.pointerEvents = 'none';
+        }, 3000);
+    }
 
     window.saveVacanciesToCloud = function() {
         const v1 = document.getElementById('vac1Input').value;
@@ -461,7 +530,7 @@
     });
 
     window.deleteHandedOver = function() {
-        if(confirm('حذف جميع السجلات المرحلة؟')) {
+        if(confirm('حذف جميع السجلات الموردة للإدارة؟')) {
             transactions.forEach(t => {
                 if(t.isHandedOver === true) remove(ref(db, `transactions/${t.firebaseKey}`));
             });
@@ -476,11 +545,12 @@
         }
     }
 
+    // طلب التوريد (للموظف)
     window.requestHandover = function() {
         const pending = transactions.some(t => t.isHandedOver === false);
-        if(!pending) { alert('لا توجد مبالغ جديدة لطلب توريدها.'); return; }
+        if(!pending) { alert('لا توجد مبالغ جديدة.'); return; }
         
-        if(confirm('هل تريد إرسال طلب توريد للإدارة؟ (سيظهر باللون البرتقالي)')) {
+        if(confirm('إرسال طلب توريد للإدارة؟')) {
             const updates = {};
             transactions.forEach(t => {
                 if(t.isHandedOver === false) {
@@ -488,15 +558,19 @@
                 }
             });
             update(ref(db), updates);
-            alert('تم إرسال الطلب! بانتظار موافقة المدير.');
+            showGlassToast('تم إرسال الطلب للمدير', '🚀');
         }
     }
 
+    // اعتماد التوريد (للمدير)
     window.approveHandover = function() {
-        const hasRequests = transactions.some(t => t.isHandedOver === 'pending');
-        if(!hasRequests) { alert('لا توجد طلبات توريد معلقة للموافقة عليها.'); return; }
+        const hasPending = transactions.some(t => t.isHandedOver === 'pending');
+        
+        // إذا لم يكن هناك معلق، هل يوجد جديد؟
+        // المنطق الجديد: الزر يتيح الاعتماد فقط للمعلق
+        if(!hasPending) { return; } 
 
-        const pin = prompt("أدخل كود المدير لاعتماد التوريد:");
+        const pin = prompt("أدخل كود المدير (fahd5):");
         if(pin === 'fahd5') {
             const updates = {};
             transactions.forEach(t => {
@@ -505,9 +579,9 @@
                 }
             });
             update(ref(db), updates);
-            alert('تم اعتماد التوريد وتصفير العهدة بنجاح ✅');
+            showGlassToast('تم اعتماد التوريد بنجاح', '💰');
         } else {
-            alert('كود خاطئ! ❌');
+            alert('الكود غير صحيح');
         }
     }
 
@@ -531,8 +605,15 @@
         tbody.innerHTML = '';
         let currentCash = 0, currentNet = 0, checkoutCount = 0;
         const todayStr = new Date().toLocaleDateString('en-GB');
+        
+        // متغيرات لحالة الزر
+        let hasNew = false;
+        let hasPending = false;
 
         transactions.forEach((t) => {
+            if (t.isHandedOver === false) hasNew = true;
+            if (t.isHandedOver === 'pending') hasPending = true;
+
             if (t.isHandedOver !== true) {
                 if(t.paymentMethod.includes('نقدى')) currentCash += parseFloat(t.amount || 0);
                 else currentNet += parseFloat(t.amount || 0);
@@ -541,15 +622,15 @@
 
             const row = document.createElement('tr');
             
-            let handIcon = '';
+            let statusText = '';
             if (t.isHandedOver === true) {
                 row.classList.add('handed-over');
-                handIcon = '<span class="status-icon status-ok">✅</span>';
+                statusText = '<span class="status-done">تم التوريد</span>';
             } else if (t.isHandedOver === 'pending') {
                 row.classList.add('pending-approval');
-                handIcon = '<span class="status-icon" style="color:orange">⏳ معلق</span>';
+                statusText = '<span class="status-pending">⏳ انتظار</span>';
             } else {
-                handIcon = '<span class="status-icon status-wait">🆕</span>';
+                statusText = '<span class="status-new">🆕 جديد</span>';
             }
 
             let paymentDisplay = t.paymentMethod;
@@ -570,15 +651,35 @@
                 <td style="color:${t.isHandedOver === true ? 'inherit' : 'var(--header-bg)'}; font-weight:bold;">${t.amount}</td>
                 <td>${paymentDisplay}</td>
                 <td style="font-size:9px;">${dateDisplay}</td>
-                <td>${handIcon}</td>
+                <td style="font-size:10px; font-weight:bold;">${statusText}</td>
                 <td>${btn}</td>
             `;
             tbody.appendChild(row);
         });
 
+        // تحديث المجاميع
         document.getElementById('totalCash').innerText = currentCash;
         document.getElementById('totalNet').innerText = currentNet;
 
+        // تحديث حالة زر المدير التفاعلي
+        const adminBtn = document.getElementById('adminBtn');
+        adminBtn.className = 'btn-action admin-btn'; // reset classes
+        
+        if (hasPending) {
+            adminBtn.classList.add('btn-admin-orange');
+            adminBtn.innerHTML = '⏳ يوجد طلب توريد معلق (اضغط للاعتماد)';
+            adminBtn.disabled = false;
+        } else if (hasNew) {
+            adminBtn.classList.add('btn-admin-red');
+            adminBtn.innerHTML = '⚠️ يوجد مبالغ لم تطلب (تنبيه)';
+            adminBtn.disabled = true; // لا يمكن الاعتماد قبل طلب الموظف (حسب السيناريو)
+        } else {
+            adminBtn.classList.add('btn-admin-gray');
+            adminBtn.innerHTML = '✅ العهدة صفر (لا يوجد توريد)';
+            adminBtn.disabled = true;
+        }
+
+        // تنبيه الخروج
         const alertBox = document.getElementById('checkoutAlert');
         if (checkoutCount > 0) {
             alertBox.style.display = 'block';
@@ -678,7 +779,7 @@ ${moneyDetails}
         const exportData = transactions.map(t => ({
             "الغرفة": t.roomNumber, "النوع": t.roomTypeName, "المصدر": t.bookingSource,
             "العقد": t.rentType, "المبلغ": t.amount, "الدفع": t.paymentMethod, 
-            "دخول": t.checkIn, "خروج": t.checkOut, "الحالة": t.isHandedOver ? "تم التوريد" : "جديد"
+            "دخول": t.checkIn, "خروج": t.checkOut, "الحالة": t.isHandedOver === true ? "تم التوريد" : (t.isHandedOver === 'pending' ? 'بانتظار الاعتماد' : 'جديد')
         }));
         const ws = XLSX.utils.json_to_sheet(exportData);
         const wb = XLSX.utils.book_new();
