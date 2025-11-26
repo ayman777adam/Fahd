@@ -4,15 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
-    <title>منظومة إيجار يومي شهري مختلط - V34 FINAL FIX</title>
+    <title>منظومة إيجار يومي شهري مختلط - V34 Ultimate</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
-        
-        /* 💡 FIX: ضمان الخلفية البيضاء فوراً لمنع وميض الشاشة السوداء في الوضع الليلي */
-        html { 
-            background-color: var(--bg-color); 
-        }
-        
+        /* ... نفس الستايل السابق ... */
         :root {
             --header-bg: #334155; 
             --accent-color: #d4af37;
@@ -64,7 +59,7 @@
             flex-direction: column; gap: 10px; transition: opacity 0.5s;
         }
         
-        /* شريط التقدم */
+        /* شريط التقدم الجديد */
         .progress-bar-container {
             width: 80%; max-width: 300px; height: 6px; background: #e2e8f0;
             border-radius: 10px; overflow: hidden; margin-top: 10px;
@@ -73,7 +68,6 @@
             height: 100%; background: var(--success-color); width: 0%;
             transition: width 0.3s ease;
         }
-
 
         .main-header {
             background: var(--header-bg); color: white; padding: 15px; border-radius: 12px;
@@ -512,31 +506,11 @@
 
     let lastReportTime = 0;
 
-    // --- نظام إعادة المحاولة (للتقارير الفاشلة) ---
-    window.retryFailedOperations = function() {
-        const failedOps = JSON.parse(localStorage.getItem('failed_operations') || '[]');
-        if (failedOps.length > 0) {
-            showGlassToast(`🔄 جاري إعادة ${failedOps.length} عملية فاشلة`, '🔄');
-            failedOps.forEach((op, index) => {
-                setTimeout(() => {
-                    if (op.type === 'transaction') {
-                        push(transactionsRef, op.data)
-                            .then(() => {
-                                failedOps.splice(index, 1);
-                                localStorage.setItem('failed_operations', JSON.stringify(failedOps));
-                            })
-                            .catch(console.error);
-                    }
-                }, index * 1000);
-            });
-        }
-    };
-
-    // --- نظام التحميل المتدرج مع مؤشر التقدم (Lazy Loading) ---
+    // --- نظام التحميل المتدرج مع مؤشر التقدم (مدمج) ---
     window.setupLazyLoading = function() {
         let currentIndex = 0;
         const batchSize = 20; 
-        const totalItems = transactions.length; 
+        const totalItems = transactions.length; // لحساب النسبة المئوية
         
         function loadNextBatch() {
             const batch = transactions.slice(currentIndex, currentIndex + batchSize);
@@ -544,13 +518,13 @@
             
             window.updateUIBatch(batch);
             
-            // تحديث شريط التقدم
+            // تحديث شريط التقدم (اضافة الصديق الثالث)
             if (totalItems > 0) {
                 const progress = Math.min(100, Math.round((currentIndex / totalItems) * 100));
                 const bar = document.getElementById('progressBarFill');
                 const txt = document.getElementById('loaderText');
                 if(bar) bar.style.width = `${progress}%`;
-                if(txt && progress < 100) txt.innerText = `جاري جلب السجلات... ${progress}%`;
+                if(txt && progress < 100) txt.innerText = `جاري جلب البيانات... ${progress}%`;
             }
 
             if (currentIndex < transactions.length) {
@@ -559,9 +533,7 @@
                 const loader = document.getElementById('loader');
                 if(loader) {
                     loader.style.opacity = '0';
-                    setTimeout(() => { 
-                        loader.style.display = 'none'; 
-                    }, 500);
+                    setTimeout(() => { loader.style.display = 'none'; }, 500);
                 }
             }
         }
@@ -617,7 +589,66 @@
         });
     }
 
-    // --- دالة الحساب الفوري للإحصائيات ---
+    // --- نظام إعادة المحاولة (اضافة الصديق الثالث) ---
+    window.retryFailedOperations = function() {
+        const failedOps = JSON.parse(localStorage.getItem('failed_operations') || '[]');
+        if (failedOps.length > 0) {
+            showGlassToast(`🔄 جاري إعادة ${failedOps.length} عملية فاشلة`, '🔄');
+            failedOps.forEach((op, index) => {
+                setTimeout(() => {
+                    if (op.type === 'transaction') {
+                        push(transactionsRef, op.data)
+                            .then(() => {
+                                failedOps.splice(index, 1);
+                                localStorage.setItem('failed_operations', JSON.stringify(failedOps));
+                            })
+                            .catch(console.error);
+                    }
+                }, index * 1000);
+            });
+        }
+    };
+
+    onValue(transactionsRef, (snapshot) => {
+        const data = snapshot.val();
+        transactions = [];
+        lastReportTime = 0;
+        
+        if (data) {
+            Object.keys(data).forEach(key => {
+                const t = { ...data[key], firebaseKey: key };
+                transactions.push(t);
+                if (!t.roomNumber && t.actionTime) {
+                    const tTime = new Date(t.actionTime).getTime();
+                    if (tTime > lastReportTime) lastReportTime = tTime;
+                }
+            });
+            transactions.sort((a, b) => b.id - a.id);
+        }
+
+        updateStatistics();
+        setupLazyLoading();
+        checkReportTimer();
+        
+        // محاولة إعادة العمليات الفاشلة عند نجاح الاتصال
+        window.retryFailedOperations();
+
+    }, (error) => {
+        console.error(error);
+        document.getElementById('loaderText').innerText = "تعذر جلب البيانات، نعمل دون اتصال";
+        document.getElementById('forceOpenBtn').style.display = 'block';
+    });
+
+    onValue(vacancyRef, (snapshot) => {
+        const data = snapshot.val() || { v1: 0, v2: 0, b1: 0, b2: 0 };
+        document.getElementById('vac1Input').value = data.v1;
+        document.getElementById('vac2Input').value = data.v2;
+        document.getElementById('book1Input').value = data.b1 || '';
+        document.getElementById('book2Input').value = data.b2 || '';
+        
+        updateTopCounters(data.v1, data.v2, data.b1, data.b2);
+    });
+
     window.updateStatistics = function() {
         let currentCash = 0, currentNet = 0, checkoutCount = 0;
         const todayStr = new Date().toLocaleDateString('en-GB');
@@ -670,141 +701,306 @@
         }
     }
 
-    onValue(transactionsRef, (snapshot) => {
-        const data = snapshot.val();
-        transactions = [];
-        lastReportTime = 0;
+    // --- بقية الدوال ---
+    function checkReportTimer() {
+        const now = Date.now();
+        const fourHours = 4 * 60 * 60 * 1000;
+        const diff = now - lastReportTime;
+        const body = document.body;
+        const header = document.getElementById('mainHeader');
+        const cashCard = document.getElementById('cashCard');
+        const netCard = document.getElementById('netCard');
+        const alertBox = document.getElementById('reportAlert');
+
+        if (lastReportTime > 0 && diff > fourHours) {
+            body.classList.add('danger-mode');
+            header.classList.add('danger-element');
+            cashCard.classList.add('danger-element');
+            netCard.classList.add('danger-element');
+            alertBox.style.display = 'block';
+        } else {
+            body.classList.remove('danger-mode');
+            header.classList.remove('danger-element');
+            cashCard.classList.remove('danger-element');
+            netCard.classList.remove('danger-element');
+            alertBox.style.display = 'none';
+        }
+    }
+    
+    setInterval(checkReportTimer, 60000);
+
+    window.showGlassToast = function(msg, icon = '✅') {
+        const container = document.getElementById('toast-container');
+        document.getElementById('toastText').innerText = msg;
+        document.getElementById('toastIcon').innerText = icon;
+        container.style.opacity = '1';
+        container.style.pointerEvents = 'auto';
+        setTimeout(() => { container.style.opacity = '0'; container.style.pointerEvents = 'none'; }, 3000);
+    }
+
+    window.saveVacanciesToCloud = function() {
+        const v1 = document.getElementById('vac1Input').value;
+        const v2 = document.getElementById('vac2Input').value;
+        const b1 = document.getElementById('book1Input').value;
+        const b2 = document.getElementById('book2Input').value;
+        update(vacancyRef, { v1: v1, v2: v2, b1: b1, b2: b2 });
+    }
+
+    window.updateTopCounters = function(v1, v2, b1 = 0, b2 = 0) {
+        if(v1 === undefined) { saveVacanciesToCloud(); return; }
+        const net1 = Math.max(0, (parseInt(v1) || 0) - (parseInt(b1) || 0));
+        const net2 = Math.max(0, (parseInt(v2) || 0) - (parseInt(b2) || 0));
+
+        document.getElementById('count-1bhk').innerText = net1;
+        document.getElementById('count-2bhk').innerText = net2;
+        document.getElementById('detail-1bhk').innerText = `(متاح للحجز ${net1} - محجوز ${b1})`;
+        document.getElementById('detail-2bhk').innerText = `(متاح للحجز ${net2} - محجوز ${b2})`;
+
+        const card1 = document.getElementById('card-1bhk');
+        const card2 = document.getElementById('card-2bhk');
+
+        if ((parseInt(b1) || 0) >= (parseInt(v1) || 0) && (parseInt(v1) > 0 || parseInt(b1) > 0)) {
+            card1.classList.add('card-red'); card1.classList.remove('card-yellow');
+        } else {
+            card1.classList.add('card-yellow'); card1.classList.remove('card-red');
+        }
+
+        if ((parseInt(b2) || 0) >= (parseInt(v2) || 0) && (parseInt(v2) > 0 || parseInt(b2) > 0)) {
+            card2.classList.add('card-red'); card2.classList.remove('card-yellow');
+        } else {
+            card2.classList.add('card-yellow'); card2.classList.remove('card-red');
+        }
+    };
+
+    window.toggleRentType = function() {
+        const type = document.getElementById('rentType').value;
+        const totalInput = document.getElementById('totalRentAmount');
+        const dailyRateDiv = document.getElementById('dailyRateDiv');
+        const nightsInput = document.getElementById('nightsCount');
+
+        document.getElementById('financeLabel').innerText = (type === 'شهري') ? 'تفاصيل العقد الشهري' : 'تفاصيل الإيجار اليومي';
         
-        if (data) {
-            Object.keys(data).forEach(key => {
-                const t = { ...data[key], firebaseKey: key };
-                transactions.push(t);
-                if (!t.roomNumber && t.actionTime) {
-                    const tTime = new Date(t.actionTime).getTime();
-                    if (tTime > lastReportTime) lastReportTime = tTime;
-                }
+        if (type === 'شهري') {
+            dailyRateDiv.style.display = 'none'; 
+            totalInput.readOnly = false; 
+            totalInput.style.backgroundColor = "#f8fafc";
+            totalInput.value = '';
+            nightsInput.value = 30; nightsInput.readOnly = true; nightsInput.style.backgroundColor = "#e2e8f0";
+        } else {
+            dailyRateDiv.style.display = 'block'; 
+            totalInput.readOnly = true; totalInput.style.backgroundColor = "#e2e8f0"; totalInput.value = '';
+            nightsInput.value = ''; nightsInput.readOnly = false; nightsInput.style.backgroundColor = "#f8fafc";
+        }
+        window.calculateCheckout();
+    }
+
+    window.calculateDailyTotal = function() {
+        if (document.getElementById('rentType').value !== 'يومي') return;
+        const rate = parseFloat(document.getElementById('dailyRate').value) || 0;
+        const nights = parseFloat(document.getElementById('nightsCount').value) || 0;
+        document.getElementById('totalRentAmount').value = rate * nights;
+        window.calculateRemaining();
+        window.calculateCheckout();
+    }
+
+    window.togglePaymentSections = function() {
+        const method = document.getElementById('paymentMethod').value;
+        const bankSec = document.getElementById('bankSection');
+        const mixedSec = document.getElementById('mixedSection');
+        const paidInput = document.getElementById('paidAmount');
+
+        bankSec.style.display = 'none'; mixedSec.style.display = 'none';
+        paidInput.readOnly = false; paidInput.style.backgroundColor = "#f8fafc";
+
+        if (method === 'تحويل') {
+            bankSec.style.display = 'block';
+            document.getElementById('bankStatusSelect').setAttribute('required', 'required');
+        } else if (method === 'مختلط') {
+            mixedSec.style.display = 'block';
+            paidInput.readOnly = true; paidInput.style.backgroundColor = "#e2e8f0";
+            window.calculateMixedTotal();
+        } else {
+            document.getElementById('bankStatusSelect').removeAttribute('required');
+        }
+    }
+
+    window.calculateRemaining = function() {
+        const total = parseFloat(document.getElementById('totalRentAmount').value) || 0;
+        const paid = parseFloat(document.getElementById('paidAmount').value) || 0;
+        document.getElementById('remainingAmount').value = total - paid;
+    }
+
+    window.calculateMixedTotal = function() {
+        const c = parseFloat(document.getElementById('mixedCash').value) || 0;
+        const n = parseFloat(document.getElementById('mixedNet').value) || 0;
+        document.getElementById('paidAmount').value = c + n;
+        window.calculateRemaining();
+    }
+
+    window.calculateCheckout = function() {
+        const dateVal = document.getElementById('checkInDate').value;
+        const nights = document.getElementById('nightsCount').value;
+        if (!dateVal || !nights) { document.getElementById('checkOutDate').value = ''; return; }
+        const d = new Date(dateVal);
+        d.setDate(d.getDate() + parseInt(nights));
+        document.getElementById('checkOutDate').value = d.toLocaleDateString('en-GB');
+    }
+
+    window.updateButtonState = function() {
+        const roomNum = document.getElementById('roomNumber').value;
+        const btn = document.getElementById('saveBtn');
+        if (!roomNum) {
+            btn.innerText = "إرسال تقرير الإشغال 📝";
+            btn.classList.add('btn-status-mode');
+            btn.style.backgroundColor = '#3b82f6';
+        } else {
+            btn.innerText = "حفظ وإرسال 📱";
+            btn.classList.remove('btn-status-mode');
+            btn.style.backgroundColor = '#25D366';
+        }
+    }
+
+    document.getElementById('checkinForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        window.saveVacanciesToCloud();
+
+        const roomNum = document.getElementById('roomNumber').value;
+        if (!roomNum) {
+            window.sendStatusWhatsapp();
+            const reportData = { actionTime: new Date().toISOString(), isReport: true };
+            push(transactionsRef, reportData);
+            showGlassToast('تم تحديث الحالة وإرسال التقرير 📝', 'ℹ️');
+            return;
+        }
+
+        const checkIn = document.getElementById('checkInDate').value;
+        const nights = document.getElementById('nightsCount').value;
+        const amt = document.getElementById('paidAmount').value;
+
+        if(!checkIn || !nights || !amt) {
+            alert('يرجى استكمال بيانات الحجز (التاريخ، الليالي، المبلغ)');
+            return;
+        }
+
+        window.calculateRemaining();
+
+        const rTypeInput = document.getElementById('roomTypeInput').value;
+        const pMethod = document.getElementById('paymentMethod').value;
+        
+        let currentV1 = parseInt(document.getElementById('vac1Input').value) || 0;
+        let currentV2 = parseInt(document.getElementById('vac2Input').value) || 0;
+        const b1 = document.getElementById('book1Input').value;
+        const b2 = document.getElementById('book2Input').value;
+
+        if(rTypeInput === '1bhk' && currentV1 > 0) currentV1--;
+        else if(rTypeInput === '2bhk' && currentV2 > 0) currentV2--;
+        
+        update(vacancyRef, { v1: currentV1, v2: currentV2, b1: b1, b2: b2 });
+
+        let finalPayMethod = pMethod;
+        let mixDetails = null;
+
+        if(pMethod === 'تحويل') {
+            const bStatus = document.getElementById('bankStatusSelect').value;
+            finalPayMethod += (bStatus === 'confirmed') ? ' (تم الاستلام ✅)' : ' (لم يؤكد ⏳)';
+        } else if(pMethod === 'مختلط') {
+            const c = document.getElementById('mixedCash').value;
+            const n = document.getElementById('mixedNet').value;
+            mixDetails = { cash: c, net: n };
+            finalPayMethod = `مختلط (${c} كاش + ${n} شبكة)`;
+        }
+
+        const data = {
+            id: Date.now(),
+            roomNumber: roomNum,
+            roomType: rTypeInput,
+            roomTypeName: (rTypeInput === '1bhk') ? 'غرفة وصالة' : 'غرفتين',
+            bookingSource: document.getElementById('bookingSource').value,
+            amount: document.getElementById('paidAmount').value,
+            paymentMethod: finalPayMethod,
+            mixDetails: mixDetails,
+            rentType: document.getElementById('rentType').value,
+            checkIn: new Date(document.getElementById('checkInDate').value).toISOString(), 
+            nights: document.getElementById('nightsCount').value,
+            checkOut: document.getElementById('checkOutDate').value, 
+            actionTime: new Date().toISOString(),
+            status: 'active',
+            isHandedOver: false,
+            totalContract: document.getElementById('totalRentAmount').value || 0,
+            debt: document.getElementById('remainingAmount').value || 0
+        };
+
+        // التعديل هنا: محاولة الارسال، وإذا فشل نحفظه محلياً للإعادة
+        push(transactionsRef, data)
+            .catch((error) => {
+                console.error('Failed to save:', error);
+                const failedOps = JSON.parse(localStorage.getItem('failed_operations') || '[]');
+                failedOps.push({ type: 'transaction', data: data, timestamp: Date.now() });
+                localStorage.setItem('failed_operations', JSON.stringify(failedOps));
+                showGlassToast('⚠️ تم حفظ البيانات محلياً وسيتم إرسالها لاحقاً', '📱');
             });
-            transactions.sort((a, b) => b.id - a.id);
-        }
 
-        updateStatistics(); 
-        setupLazyLoading(); 
-        checkReportTimer();
+        sendWhatsapp(data);
         
-        // إعادة محاولة العمليات الفاشلة عند اتصال ناجح
-        if (data) {
-            setTimeout(() => {
-                window.retryFailedOperations();
-            }, 3000);
-        }
-
-    }, (error) => {
-        console.error(error);
-        document.getElementById('loaderText').innerText = "تعذر جلب البيانات، نعمل دون اتصال";
-        document.getElementById('forceOpenBtn').style.display = 'block';
+        this.reset();
+        window.setupDateDropdown();
+        window.toggleRentType();
+        window.togglePaymentSections();
+        window.updateButtonState(); 
     });
 
-    onValue(vacancyRef, (snapshot) => {
-        const data = snapshot.val() || { v1: 0, v2: 0, b1: 0, b2: 0 };
-        document.getElementById('vac1Input').value = data.v1;
-        document.getElementById('vac2Input').value = data.v2;
-        document.getElementById('book1Input').value = data.b1 || '';
-        document.getElementById('book2Input').value = data.b2 || '';
-        
-        updateTopCounters(data.v1, data.v2, data.b1, data.b2);
-    });
-
-    // --- دالة الرسالة الذكية للحجز (لم يطلب تعديلها) ---
     window.sendWhatsapp = function(data) {
-        // 1. القسم المالي
         let moneyDetails = `*💰 المدفوع:* ${data.amount} ريال`;
         if (data.totalContract > data.amount) {
             moneyDetails += `\n*📉 الإجمالي:* ${data.totalContract}\n*⚠️ المتبقي:* ${data.debt}`;
         }
 
-        // 2. جلب الأرقام للحساب
-        const v1 = parseInt(document.getElementById('vac1Input').value) || 0;
-        const v2 = parseInt(document.getElementById('vac2Input').value) || 0;
-        const b1 = parseInt(document.getElementById('book1Input').value) || 0;
-        const b2 = parseInt(document.getElementById('book2Input').value) || 0;
+        const v1 = document.getElementById('vac1Input').value;
+        const v2 = document.getElementById('vac2Input').value;
+        const b1 = document.getElementById('book1Input').value;
+        const b2 = document.getElementById('book2Input').value;
+        
+        const net1 = Math.max(0, (v1||0) - (b1||0));
+        const net2 = Math.max(0, (v2||0) - (b2||0));
 
-        // 3. منطق النصائح الذكي (Smart Advice Logic)
-        let advice1 = "";
-        const diff1 = v1 - b1; 
-        if (diff1 < 0) {
-            advice1 = `⛔ قفل بوكينج (غرفة وصالة) فوراً عندك فائض عدد ${Math.abs(diff1)} حجوزات !`;
-        } else if (diff1 > 0) {
-            advice1 = `✅ فتح عدد ${diff1} (غرفة وصالة) على بوكينج " شاغر كثير"`;
-        } else {
-            advice1 = `⚖️ (غرفة وصالة) متوازن (الشاغر يغطي الحجوزات بالضبط)`;
-        }
-
-        let advice2 = "";
-        const diff2 = v2 - b2; 
-        if (diff2 < 0) {
-            advice2 = `⛔ قفل بوكينج (غرفتين) فوراً عندك فائض عدد ${Math.abs(diff2)} حجوزات !`;
-        } else if (diff2 > 0) {
-            advice2 = `✅ فتح عدد ${diff2} (غرفتين) على بوكينج " شاغر كثير"`;
-        } else {
-            advice2 = `⚖️ (غرفتين) متوازن (الشاغر يغطي الحجوزات بالضبط)`;
-        }
-
-        // 4. تنسيق التاريخ والوقت
         const dateObj = new Date(data.checkIn);
         const dateStr = dateObj.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' });
-        const timeStr = new Date().toLocaleString('ar-EG');
+        
+        const checkOutObj = new Date(data.checkOut.split('/').reverse().join('-'));
+        let checkOutStr = data.checkOut;
+        if(!isNaN(checkOutObj)) {
+             checkOutStr = checkOutObj.toLocaleDateString('ar-EG', { year: 'numeric', month: 'numeric', day: 'numeric' });
+        }
 
-        // 5. تجميع الرسالة النهائية
+        const timeObj = new Date(data.actionTime);
+        const timeStr = timeObj.toLocaleString('ar-EG');
+
         const text = `تقرير إيجار غرفة ${data.roomNumber} - ${data.roomTypeName}
 ----------------------------
 نوع العقد: ${data.rentType} (${data.bookingSource})
 ${moneyDetails}
 🗓️ الدخول: ${dateStr}
 🌙 المدة: ${data.nights} ليالي
-📤 الخروج: ${data.checkOut}
+📤 الخروج: ${checkOutStr}
 💳 الدفع: ${data.paymentMethod}
-🔢 الشاغر: ${v1} غرف وصاله  |  ${v2} غرفتين
+🔢 الشاغر: ${net1} غرف وصاله  |  ${net2} غرفتين
 محجوز بوكينج : ${b1} غرفه وصاله و ${b2} غرفتين
-----------------------------
-منظومه الإيجار المختلط تنصح ب 
-${advice1}
-${advice2}
 ----------------------------
 🕒: ${timeStr}`;
 
         const url = `https://wa.me/?text=${encodeURIComponent(text.trim())}`;
         window.open(url, '_blank');
     }
-    
-    // --- دالة رسالة الإشغال (المعدلة والمصححة لخلل التعطل) ---
+
     window.sendStatusWhatsapp = function() {
-        const v1 = parseInt(document.getElementById('vac1Input').value) || 0;
-        const v2 = parseInt(document.getElementById('vac2Input').value) || 0;
-        const b1 = parseInt(document.getElementById('book1Input').value) || 0;
-        const b2 = parseInt(document.getElementById('book2Input').value) || 0;
+        const v1 = document.getElementById('vac1Input').value || 0;
+        const v2 = document.getElementById('vac2Input').value || 0;
+        const b1 = document.getElementById('book1Input').value || 0;
+        const b2 = document.getElementById('book2Input').value || 0;
         
-        // --- منطق النصائح الذكي (Smart Advice Logic) ---
-        let advice1 = "";
-        const diff1 = v1 - b1; 
-        if (diff1 < 0) {
-            advice1 = `⛔ قفل بوكينج (غرفة وصالة) فوراً عندك فائض عدد ${Math.abs(diff1)} حجوزات !`;
-        } else if (diff1 > 0) {
-            advice1 = `✅ فتح عدد ${diff1} (غرفة وصالة) على بوكينج " شاغر كثير"`;
-        } else {
-            advice1 = `⚖️ (غرفة وصالة) متوازن (الشاغر يغطي الحجوزات بالضبط)`;
-        }
-
-        let advice2 = "";
-        const diff2 = v2 - b2; 
-        if (diff2 < 0) {
-            advice2 = `⛔ قفل بوكينج (غرفتين) فوراً عندك فائض عدد ${Math.abs(diff2)} حجوزات !`;
-        } else if (diff2 > 0) {
-            advice2 = `✅ فتح عدد ${diff2} (غرفتين) على بوكينج " شاغر كثير"`;
-        } else {
-            advice2 = `⚖️ (غرفتين) متوازن (الشاغر يغطي الحجوزات بالضبط)`;
-        }
-
-        // --- تنسيق الرسالة ---
+        const net1 = Math.max(0, v1 - b1);
+        const net2 = Math.max(0, v2 - b2);
+        
         const now = new Date();
         const nowStr = now.toLocaleTimeString('ar-EG', {hour: 'numeric', minute:'numeric'});
         const next = new Date(now.getTime() + 4*60*60*1000);
@@ -816,19 +1012,16 @@ ${advice2}
 الساعه ${nowStr}
 التقرير التالي ${nextStr}
 ----------------------------
-🔢 الشاغر: ${v1} غرف وصاله  |  ${v2} غرفتين
-محجوز بوكينج : ${b1} غرفه وصاله و ${b2} غرفتين
-----------------------------
-منظومه الإيجار المختلط تنصح ب 
-${advice1}
-${advice2}
+🏠 
+- إجمالي الشاغر: ${v1} غرفة وصالة + ${v2} غرفتين
+- حجوزات بوكينج : ${b1} غرفة وصالة + ${b2} غرفتين
+✅ المتاح للبيع : ${net1} غرفة وصالة + ${net2} غرفتين
 ----------------------------
 🕒: ${fullDate}`;
 
         const url = `https://wa.me/?text=${encodeURIComponent(text.trim())}`;
         window.open(url, '_blank');
     }
-
 
     window.deleteHandedOver = function() { if(confirm('حذف جميع السجلات الموردة للإدارة؟')) transactions.forEach(t => { if(t.isHandedOver === true) remove(ref(db, `transactions/${t.firebaseKey}`)); }); }
     window.deleteExpired = function() { if(confirm('حذف الحجوزات المنتهية؟')) transactions.forEach(t => { if(t.status === 'completed') remove(ref(db, `transactions/${t.firebaseKey}`)); }); }
