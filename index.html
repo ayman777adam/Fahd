@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة إيجار يومي شهري مختلط - V27</title>
+    <title>منظومة إيجار يومي شهري مختلط - V28</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
@@ -32,7 +32,24 @@
             background-attachment: fixed;
             margin: 0; padding: 15px; color: var(--text-color);
             padding-bottom: 50px;
+            transition: background-color 0.5s;
         }
+
+        /* فئة الخطر (تأخير التقرير) */
+        .danger-mode {
+            animation: bg-pulse 2s infinite alternate;
+        }
+        @keyframes bg-pulse { from { background-color: #fee2e2; } to { background-color: #fecaca; } }
+
+        .danger-element {
+            background: #ef4444 !important;
+            color: white !important;
+            border-color: #b91c1c !important;
+            animation: pulse-border 1.5s infinite;
+        }
+        .danger-element .finance-val, .danger-element h4 { color: white !important; }
+        
+        @keyframes pulse-border { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
         .container { max-width: 600px; margin: 0 auto; position: relative; z-index: 1; }
 
@@ -51,6 +68,7 @@
         .main-header {
             background: var(--header-bg); color: white; padding: 15px; border-radius: 12px;
             text-align: center; margin-bottom: 20px; box-shadow: var(--shadow-soft);
+            transition: background 0.5s;
         }
         .header-content h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
 
@@ -80,6 +98,7 @@
         .finance-card {
             background: white; padding: 12px; border-radius: 10px; text-align: center;
             border-top: 3px solid var(--header-bg); box-shadow: var(--shadow-soft);
+            transition: background 0.5s, border-color 0.5s;
         }
         .finance-val { font-size: 22px; font-weight: 800; color: var(--header-bg); }
         .finance-card h4 { margin: 0; font-size: 12px; color: #64748b; }
@@ -154,6 +173,14 @@
             font-size: 13px; font-weight: bold; border-radius: 8px; margin-bottom: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05); animation: pulse 2s infinite;
         }
+        
+        #reportAlert {
+            display: none; background-color: #fee2e2; color: #b91c1c;
+            border: 1px solid #fecaca; padding: 10px; text-align: center;
+            font-size: 14px; font-weight: bold; border-radius: 8px; margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); animation: pulse 1s infinite;
+        }
+
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
 
         .history-box { background: white; padding: 10px; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-soft); }
@@ -199,7 +226,7 @@
             .history-box { position: absolute; left: 0; top: 0; width: 100%; padding: 0; background: white; box-shadow: none; }
             .fixed-footer { position: relative; visibility: visible; border: none; background: none; margin-top: 20px; width: 100%; text-align: center; }
             .fixed-footer-text { background: none; font-size: 12pt; color: #000; }
-            .history-header, #checkoutAlert, .admin-btn, .del-buttons, #saveBtn, .action-buttons { display: none !important; }
+            .history-header, #checkoutAlert, #reportAlert, .admin-btn, .del-buttons, #saveBtn, .action-buttons { display: none !important; }
             tr.handed-over, button { display: none !important; }
             table { border: 1px solid #000; width: 100%; direction: rtl; border-collapse: collapse; }
             th, td { border: 1px solid #000; padding: 5px; color: #000; text-align: center; font-size: 10pt; }
@@ -223,18 +250,20 @@
 </div>
 
 <div class="container">
-    <div class="main-header">
+    <div id="reportAlert">⚠️ الرجاء سرعة إرسال تقرير الإشغال</div>
+
+    <div class="main-header" id="mainHeader">
         <div class="header-content">
             <h1>🏢 منظومة إيجار يومي شهري مختلط</h1>
         </div>
     </div>
 
     <div class="finance-section">
-        <div class="finance-card">
+        <div class="finance-card" id="cashCard">
             <div class="finance-val"><span id="totalCash">0</span></div>
             <h4>نقدى (الكاش)</h4>
         </div>
-        <div class="finance-card net">
+        <div class="finance-card net" id="netCard">
             <div class="finance-val"><span id="totalNet">0</span></div>
             <h4>شبكة / تحويل</h4>
         </div>
@@ -273,7 +302,7 @@
                 </div>
                 <div class="full-width">
                     <label>التاريخ</label>
-                    <select id="checkInDate" required onchange="calculateCheckout()"></select>
+                    <select id="checkInDate" onchange="calculateCheckout()"></select> <!-- removed required -->
                 </div>
                 <div>
                     <label>النوع</label>
@@ -284,7 +313,7 @@
                 </div>
                 <div>
                     <label>الليالي</label>
-                    <input type="number" id="nightsCount" min="1" placeholder="..." required oninput="calculateDailyTotal()">
+                    <input type="number" id="nightsCount" min="1" placeholder="..." oninput="calculateDailyTotal()"> <!-- removed required -->
                 </div>
                 <div class="full-width">
                     <label>الخروج</label>
@@ -309,7 +338,7 @@
             <div class="finance-group">
                 <div class="finance-label" id="financeLabel">تفاصيل الإيجار</div>
                 <div class="form-grid">
-                    <!-- خانة إيجار اليوم الواحد (لليومي فقط) -->
+                    <!-- خانة إيجار اليوم الواحد -->
                     <div id="dailyRateDiv">
                         <label style="color:var(--booking-blue)">إيجار اليوم الواحد</label>
                         <input type="number" id="dailyRate" placeholder="سعر الليلة" oninput="calculateDailyTotal()">
@@ -453,16 +482,28 @@
     const transactionsRef = ref(db, 'transactions');
     const vacancyRef = ref(db, 'vacancies');
 
+    // متغير للوقت
+    let lastReportTime = 0;
+
     onValue(transactionsRef, (snapshot) => {
         const data = snapshot.val();
         transactions = [];
+        lastReportTime = 0; // reset finding
+        
         if (data) {
             Object.keys(data).forEach(key => {
-                transactions.push({ ...data[key], firebaseKey: key });
+                const t = { ...data[key], firebaseKey: key };
+                transactions.push(t);
+                // البحث عن آخر تقرير (بدون رقم غرفة)
+                if (!t.roomNumber && t.actionTime) {
+                    const tTime = new Date(t.actionTime).getTime();
+                    if (tTime > lastReportTime) lastReportTime = tTime;
+                }
             });
             transactions.sort((a, b) => b.id - a.id);
         }
         updateUI();
+        checkReportTimer();
     });
 
     onValue(vacancyRef, (snapshot) => {
@@ -474,6 +515,38 @@
         
         updateTopCounters(data.v1, data.v2, data.b1, data.b2);
     });
+
+    // --- مؤقت التنبيه ---
+    function checkReportTimer() {
+        const now = Date.now();
+        const fourHours = 4 * 60 * 60 * 1000;
+        const diff = now - lastReportTime;
+        
+        const body = document.body;
+        const header = document.getElementById('mainHeader');
+        const cashCard = document.getElementById('cashCard');
+        const netCard = document.getElementById('netCard');
+        const alertBox = document.getElementById('reportAlert');
+
+        if (lastReportTime > 0 && diff > fourHours) {
+            // تفعيل وضع الخطر
+            body.classList.add('danger-mode');
+            header.classList.add('danger-element');
+            cashCard.classList.add('danger-element');
+            netCard.classList.add('danger-element');
+            alertBox.style.display = 'block';
+        } else {
+            // إيقاف وضع الخطر
+            body.classList.remove('danger-mode');
+            header.classList.remove('danger-element');
+            cashCard.classList.remove('danger-element');
+            netCard.classList.remove('danger-element');
+            alertBox.style.display = 'none';
+        }
+    }
+    
+    // فحص المؤقت كل دقيقة
+    setInterval(checkReportTimer, 60000);
 
     window.showGlassToast = function(msg, icon = '✅') {
         const container = document.getElementById('toast-container');
@@ -529,8 +602,8 @@
         document.getElementById('financeLabel').innerText = (type === 'شهري') ? 'تفاصيل العقد الشهري' : 'تفاصيل الإيجار اليومي';
         
         if (type === 'شهري') {
-            dailyRateDiv.style.display = 'none'; // إخفاء سعر الليلة
-            totalInput.readOnly = false; // فتح الإجمالي للكتابة
+            dailyRateDiv.style.display = 'none'; 
+            totalInput.readOnly = false; 
             totalInput.style.backgroundColor = "#f8fafc";
             totalInput.value = '';
             
@@ -538,8 +611,8 @@
             nightsInput.readOnly = true; 
             nightsInput.style.backgroundColor = "#e2e8f0";
         } else {
-            dailyRateDiv.style.display = 'block'; // إظهار سعر الليلة
-            totalInput.readOnly = true; // قفل الإجمالي (حساب تلقائي)
+            dailyRateDiv.style.display = 'block'; 
+            totalInput.readOnly = true; 
             totalInput.style.backgroundColor = "#e2e8f0";
             totalInput.value = '';
             
@@ -550,19 +623,12 @@
         window.calculateCheckout();
     }
 
-    // دالة حساب إيجار اليوم الواحد (جديدة)
     window.calculateDailyTotal = function() {
-        // التأكد من أن الوضع يومي قبل الحساب
         if (document.getElementById('rentType').value !== 'يومي') return;
-
         const rate = parseFloat(document.getElementById('dailyRate').value) || 0;
         const nights = parseFloat(document.getElementById('nightsCount').value) || 0;
-        
-        // الحساب: السعر * الليالي
         const total = rate * nights;
         document.getElementById('totalRentAmount').value = total;
-        
-        // تحديث المتبقي والخروج
         window.calculateRemaining();
         window.calculateCheckout();
     }
@@ -637,13 +703,27 @@
         
         if (!roomNum) {
             window.sendStatusWhatsapp();
+            
+            // تسجيل التقرير في قاعدة البيانات لضبط المؤقت
+            const reportData = {
+                actionTime: new Date().toISOString(),
+                isReport: true // علامة لتمييز التقرير
+            };
+            push(transactionsRef, reportData);
+
             showGlassToast('تم تحديث الحالة وإرسال التقرير 📝', 'ℹ️');
             return;
         }
 
+        // التحقق اليدوي للبيانات عند الحجز
+        const checkIn = document.getElementById('checkInDate').value;
+        const nights = document.getElementById('nightsCount').value;
         const amt = document.getElementById('paidAmount').value;
-        // السماح بـ 0 إذا كان دين كامل، لكن يفضل التنبيه
-        // if(!amt) { alert('يرجى إدخال المبلغ المدفوع'); return; }
+
+        if(!checkIn || !nights || !amt) {
+            alert('يرجى استكمال بيانات الحجز (التاريخ، الليالي، المبلغ)');
+            return;
+        }
 
         window.calculateRemaining();
 
@@ -755,21 +835,32 @@ ${moneyDetails}
         const net1 = Math.max(0, v1 - b1);
         const net2 = Math.max(0, v2 - b2);
         
-        const now = new Date().toLocaleString('ar-EG');
+        // الوقت الحالي
+        const now = new Date();
+        const nowStr = now.toLocaleTimeString('ar-EG', {hour: 'numeric', minute:'numeric'});
+        
+        // وقت التقرير التالي (+4 ساعات)
+        const next = new Date(now.getTime() + 4*60*60*1000);
+        const nextStr = next.toLocaleTimeString('ar-EG', {hour: 'numeric', minute:'numeric'});
+        
+        // التاريخ الكامل في الأسفل
+        const fullDate = now.toLocaleString('ar-EG');
 
         const text = `*📊 تقرير حالة الإشغال الحالي*
+الساعه ${nowStr} 
+التقرير التالي ${nextStr}
 ----------------------------
 *🏠 غرفة وصالة:*
-- إجمالي الشاغر: ${v1}
-- حجوزات بوكينج: ${b1}
-✅ *المتاح للبيع:* ${net1}
+- إجمالي الشاغر: ${v1} غرفة وصالة
+- حجوزات بوكينج: ${b1} غرفة وصالة
+✅ *المتاح للبيع:* ${net1} غرفة وصالة
 
 *🏠 غرفتين:*
-- إجمالي الشاغر: ${v2}
-- حجوزات بوكينج: ${b2}
-✅ *المتاح للبيع:* ${net2}
+- إجمالي الشاغر: ${v2} غرفتين
+- حجوزات بوكينج: ${b2} غرفتين
+✅ *المتاح للبيع:* ${net2} غرفتين
 ----------------------------
-*🕒:* ${now}`;
+*🕒:* ${fullDate}`;
 
         const url = `https://wa.me/?text=${encodeURIComponent(text.trim())}`;
         window.open(url, '_blank');
@@ -783,6 +874,9 @@ ${moneyDetails}
         let hasNew = false, hasPending = false;
 
         transactions.forEach((t) => {
+            // تجاهل سجلات التقارير (التي بدون رقم غرفة) في جدول العمليات
+            if (!t.roomNumber) return;
+
             if (t.isHandedOver === false) hasNew = true;
             if (t.isHandedOver === 'pending') hasPending = true;
 
