@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة إيجار يومي شهري مختلط - V29</title>
+    <title>منظومة إيجار يومي شهري مختلط - V30</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
@@ -35,7 +35,6 @@
             transition: background-color 0.5s;
         }
 
-        /* وضع الخطر (تأخير التقرير) */
         .danger-mode { animation: bg-pulse 2s infinite alternate; }
         @keyframes bg-pulse { from { background-color: #fee2e2; } to { background-color: #fecaca; } }
 
@@ -779,7 +778,7 @@
     });
 
     window.sendWhatsapp = function(data) {
-        let moneyDetails = `*💰 المبلغ:* ${data.amount} ريال`;
+        let moneyDetails = `*💰 المدفوع:* ${data.amount} ريال`;
         if (data.totalContract > data.amount) {
             moneyDetails += `\n*📉 الإجمالي:* ${data.totalContract}\n*⚠️ المتبقي:* ${data.debt}`;
         }
@@ -804,16 +803,15 @@
         const timeObj = new Date(data.actionTime);
         const timeStr = timeObj.toLocaleString('ar-EG');
 
-        const text = `تقرير إيجار غرفة ${data.roomNumber} - ${data.roomTypeName}
+        const text = `-----------------------------
+تقرير حالة الإشغال الحالي
+الساعه 12:45 مساء
+التقرير التالي 16:45 مساء
 ----------------------------
-نوع العقد: ${data.rentType} (${data.bookingSource})
-${moneyDetails}
-🗓️ الدخول: ${dateStr}
-🌙 المدة: ${data.nights} ليالي
-📤 الخروج: ${checkOutStr}
-💳 الدفع: ${data.paymentMethod}
-🔢 الشاغر: ${net1} غرف وصاله  |  ${net2} غرفتين
-محجوز بوكينج : ${b1} غرفه وصاله و ${b2} غرفتين
+🏠 
+- إجمالي الشاغر: ${v1} غرفة وصالة + ${v2} غرفتين
+- حجوزات بوكينج : ${b1} غرفة وصالة + ${b2} غرفتين
+✅ المتاح للبيع : ${net1} غرفة وصالة + ${net2} غرفتين
 ----------------------------
 🕒: ${timeStr}`;
 
@@ -838,21 +836,17 @@ ${moneyDetails}
         
         const fullDate = now.toLocaleString('ar-EG');
 
-        const text = `*📊 تقرير حالة الإشغال الحالي*
-الساعه ${nowStr} 
+        const text = `-----------------------------
+تقرير حالة الإشغال الحالي
+الساعه ${nowStr}
 التقرير التالي ${nextStr}
 ----------------------------
-*🏠 غرفة وصالة:*
-- إجمالي الشاغر: ${v1} غرفة وصالة
-- حجوزات بوكينج: ${b1} غرفة وصالة
-✅ *المتاح للبيع:* ${net1} غرفة وصالة
-
-*🏠 غرفتين:*
-- إجمالي الشاغر: ${v2} غرفتين
-- حجوزات بوكينج: ${b2} غرفتين
-✅ *المتاح للبيع:* ${net2} غرفتين
+🏠 
+- إجمالي الشاغر: ${v1} غرفة وصالة + ${v2} غرفتين
+- حجوزات بوكينج : ${b1} غرفة وصالة + ${b2} غرفتين
+✅ المتاح للبيع : ${net1} غرفة وصالة + ${net2} غرفتين
 ----------------------------
-*🕒:* ${fullDate}`;
+🕒: ${fullDate}`;
 
         const url = `https://wa.me/?text=${encodeURIComponent(text.trim())}`;
         window.open(url, '_blank');
