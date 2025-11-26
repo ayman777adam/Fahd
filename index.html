@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة إيجار يومي شهري مختلط - V19</title>
+    <title>منظومة إيجار يومي شهري مختلط - V20</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
@@ -29,7 +29,7 @@
             background-size: 71px 71px;
             background-attachment: fixed;
             margin: 0; padding: 15px; color: var(--text-color);
-            padding-bottom: 50px; /* مسافة للشريط المصغر */
+            padding-bottom: 50px;
         }
 
         .container { max-width: 600px; margin: 0 auto; position: relative; z-index: 1; }
@@ -50,9 +50,9 @@
         }
         .header-content h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
 
-        /* Footer المصغر */
+        /* Footer */
         .fixed-footer {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 30px; /* تصغير الارتفاع */
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 30px;
             background-color: #f1f5f9;
             border-top: 1px solid #cbd5e1;
             display: flex; justify-content: center; align-items: center; z-index: 9999;
@@ -62,7 +62,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* Toast Notification (رسالة زجاجية) */
+        /* Toast */
         #toast-container {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             z-index: 10000; pointer-events: none; opacity: 0; transition: opacity 0.3s;
@@ -102,19 +102,15 @@
         .btn-print { background: #d97706; }
         .btn-excel { background: #059669; }
 
-        /* زر الاعتماد الذكي */
         .admin-btn {
             grid-column: span 3; margin-top: 5px; padding: 12px; font-size: 14px;
             border: 1px solid rgba(0,0,0,0.1);
         }
-        /* حالات الزر */
         .btn-admin-red { 
-            background: linear-gradient(45deg, #dc2626, #ef4444); color: white;
-            animation: none; 
+            background: linear-gradient(45deg, #dc2626, #ef4444); color: white; animation: none; 
         }
         .btn-admin-orange { 
-            background: linear-gradient(45deg, #d97706, #f59e0b); color: white;
-            animation: pulse-orange 2s infinite;
+            background: linear-gradient(45deg, #d97706, #f59e0b); color: white; animation: pulse-orange 2s infinite;
         }
         .btn-admin-gray { 
             background: #e2e8f0; color: #94a3b8; cursor: default;
@@ -187,7 +183,6 @@
         .col-stat { width: 10%; font-weight: bold; font-size: 10px; }
         .col-act { width: 15%; }
 
-        /* حالات الترحيل في الجدول */
         .status-new { color: var(--danger-color); }
         .status-pending { color: var(--warning-color); }
         .status-done { color: var(--success-color); }
@@ -205,7 +200,6 @@
             .history-box, .history-box * { visibility: visible; }
             .history-box { position: absolute; left: 0; top: 0; width: 100%; padding: 0; background: white; box-shadow: none; }
             
-            /* إظهار حقوق المطور في الطباعة */
             .fixed-footer { position: relative; visibility: visible; border: none; background: none; margin-top: 20px; width: 100%; text-align: center; }
             .fixed-footer-text { background: none; font-size: 12pt; color: #000; }
 
@@ -226,7 +220,6 @@
     <div>جاري الاتصال بالسيرفر...</div>
 </div>
 
-<!-- حاوية الإشعارات الزجاجية -->
 <div id="toast-container">
     <div class="glass-toast" id="toastMsg">
         <span class="glass-icon" id="toastIcon">✅</span>
@@ -257,7 +250,6 @@
         <button class="btn-action btn-print" onclick="window.print()">🖨️ طباعة تقرير الإيراد</button>
         <button class="btn-action btn-excel" onclick="exportToExcel()">📊 تصدير كل العمليات</button>
         
-        <!-- زر الاعتماد التفاعلي -->
         <button id="adminBtn" class="btn-action admin-btn btn-admin-gray" onclick="approveHandover()">
             🔑 لا يوجد مبالغ للتوريد
         </button>
@@ -453,14 +445,12 @@
         updateTopCounters(data.v1, data.v2);
     });
 
-    // --- دوال العرض والتنبيهات الزجاجية ---
     window.showGlassToast = function(msg, icon = '✅') {
         const container = document.getElementById('toast-container');
         document.getElementById('toastText').innerText = msg;
         document.getElementById('toastIcon').innerText = icon;
         container.style.opacity = '1';
         container.style.pointerEvents = 'auto';
-        
         setTimeout(() => {
             container.style.opacity = '0';
             container.style.pointerEvents = 'none';
@@ -545,7 +535,6 @@
         }
     }
 
-    // طلب التوريد (للموظف)
     window.requestHandover = function() {
         const pending = transactions.some(t => t.isHandedOver === false);
         if(!pending) { alert('لا توجد مبالغ جديدة.'); return; }
@@ -562,15 +551,11 @@
         }
     }
 
-    // اعتماد التوريد (للمدير)
     window.approveHandover = function() {
         const hasPending = transactions.some(t => t.isHandedOver === 'pending');
-        
-        // إذا لم يكن هناك معلق، هل يوجد جديد؟
-        // المنطق الجديد: الزر يتيح الاعتماد فقط للمعلق
         if(!hasPending) { return; } 
 
-        const pin = prompt("أدخل كود المدير (fahd5):");
+        const pin = prompt("أدخل كود المدير:");
         if(pin === 'fahd5') {
             const updates = {};
             transactions.forEach(t => {
@@ -606,7 +591,6 @@
         let currentCash = 0, currentNet = 0, checkoutCount = 0;
         const todayStr = new Date().toLocaleDateString('en-GB');
         
-        // متغيرات لحالة الزر
         let hasNew = false;
         let hasPending = false;
 
@@ -657,13 +641,11 @@
             tbody.appendChild(row);
         });
 
-        // تحديث المجاميع
         document.getElementById('totalCash').innerText = currentCash;
         document.getElementById('totalNet').innerText = currentNet;
 
-        // تحديث حالة زر المدير التفاعلي
         const adminBtn = document.getElementById('adminBtn');
-        adminBtn.className = 'btn-action admin-btn'; // reset classes
+        adminBtn.className = 'btn-action admin-btn'; 
         
         if (hasPending) {
             adminBtn.classList.add('btn-admin-orange');
@@ -672,14 +654,13 @@
         } else if (hasNew) {
             adminBtn.classList.add('btn-admin-red');
             adminBtn.innerHTML = '⚠️ يوجد مبالغ لم تطلب (تنبيه)';
-            adminBtn.disabled = true; // لا يمكن الاعتماد قبل طلب الموظف (حسب السيناريو)
+            adminBtn.disabled = true;
         } else {
             adminBtn.classList.add('btn-admin-gray');
             adminBtn.innerHTML = '✅ العهدة صفر (لا يوجد توريد)';
             adminBtn.disabled = true;
         }
 
-        // تنبيه الخروج
         const alertBox = document.getElementById('checkoutAlert');
         if (checkoutCount > 0) {
             alertBox.style.display = 'block';
