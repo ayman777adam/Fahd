@@ -47,12 +47,14 @@
         .main-header {
             background: var(--header-bg); color: white; padding: 20px; border-radius: 12px;
             text-align: center; margin-bottom: 20px; box-shadow: var(--shadow-soft);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .header-content h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
 
         .fixed-footer {
             position: fixed; bottom: 0; left: 0; width: 100%; height: 50px;
             background-color: #e5e7eb;
+            background-image: repeating-linear-gradient(45deg, #d1d5db 0px, #d1d5db 1px, transparent 1px, transparent 10px);
             border-top: 2px solid #94a3b8;
             display: flex; justify-content: center; align-items: center; z-index: 9999;
         }
@@ -350,7 +352,6 @@
 </div>
 
 <script type="module">
-    // استخدمنا إصدار 10.12.2 المضمون بدلاً من 11
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
@@ -445,7 +446,7 @@
             checkOut: document.getElementById('checkOutDate').value,
             actionTime: new Date().toLocaleString('en-GB'),
             status: 'active',
-            isHandedOver: false, // false=جديد, 'pending'=معلق, true=مرحل
+            isHandedOver: false,
             totalContract: document.getElementById('totalMonthlyRent').value || 0,
             debt: document.getElementById('remainingAmount').value || 0
         };
@@ -475,7 +476,6 @@
         }
     }
 
-    // 1. زر الموظف: طلب توريد
     window.requestHandover = function() {
         const pending = transactions.some(t => t.isHandedOver === false);
         if(!pending) { alert('لا توجد مبالغ جديدة لطلب توريدها.'); return; }
@@ -492,7 +492,6 @@
         }
     }
 
-    // 2. زر المدير: اعتماد التوريد (بكود fahd5)
     window.approveHandover = function() {
         const hasRequests = transactions.some(t => t.isHandedOver === 'pending');
         if(!hasRequests) { alert('لا توجد طلبات توريد معلقة للموافقة عليها.'); return; }
@@ -534,7 +533,6 @@
         const todayStr = new Date().toLocaleDateString('en-GB');
 
         transactions.forEach((t) => {
-            // الحساب المالي: يحسب الجديد والمعلق فقط
             if (t.isHandedOver !== true) {
                 if(t.paymentMethod.includes('نقدى')) currentCash += parseFloat(t.amount || 0);
                 else currentNet += parseFloat(t.amount || 0);
@@ -658,15 +656,19 @@
         if (data.rentType === 'شهري') moneyDetails += `\n*📉 العقد:* ${data.totalContract}\n*⚠️ الباقي:* ${data.debt}`;
         const v1 = document.getElementById('vac1Input').value;
         const v2 = document.getElementById('vac2Input').value;
-        const text = `
-*${data.roomNumber} - ${data.roomTypeName}*
+        
+        const text = `*تقرير إيجار غرفة ${data.roomNumber} - ${data.roomTypeName}*
 ----------------------------
-*العقد:* ${data.rentType} (${data.bookingSource})
+*نوع العقد:* ${data.rentType} (${data.bookingSource})
 ${moneyDetails}
-*🗓️* ${data.checkIn} ➔ ${data.checkOut}
-*💳* ${data.paymentMethod}
-*🔢 الشاغر:* ${v1} (غرفة وصالة) | ${v2} (غرفتين)
-`;
+*🗓️ الدخول:* ${data.checkIn}
+*🌙 المدة:* ${data.nights} ليالي
+*📤 الخروج:* ${data.checkOut}
+*💳 الدفع:* ${data.paymentMethod}
+*🔢 الشاغر:* ${v1} غرف وصاله  |  ${v2} غرفتين 
+----------------------------
+*🕒:* ${data.actionTime}`;
+
         const url = `https://wa.me/?text=${encodeURIComponent(text.trim())}`;
         window.open(url, '_blank');
     }
