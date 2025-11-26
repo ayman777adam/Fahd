@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة إيجار يومي شهري مختلط - V31 Final</title>
+    <title>منظومة إيجار يومي شهري مختلط - V32</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
@@ -53,11 +53,18 @@
 
         #loader { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(255,255,255,0.98); z-index: 99999;
+            background: rgba(255,255,255,1); z-index: 99999; /* خلفية بيضاء بالكامل */
             display: flex; justify-content: center; align-items: center;
-            font-family: 'Cairo', sans-serif; font-size: 16px; color: var(--header-bg);
-            flex-direction: column; gap: 10px;
+            font-family: 'Cairo', sans-serif; font-size: 18px; color: var(--header-bg);
+            flex-direction: column; gap: 15px; transition: opacity 0.5s ease;
         }
+        /* تأثير دوران للودر */
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--accent-color); border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .main-header {
             background: var(--header-bg); color: white; padding: 15px; border-radius: 12px;
@@ -232,7 +239,7 @@
 <body>
 
 <div id="loader">
-    <div>⏳</div>
+    <div class="spinner"></div>
     <div>جاري الاتصال بالسيرفر...</div>
 </div>
 
@@ -466,7 +473,7 @@
     try {
         app = initializeApp(firebaseConfig);
         db = getDatabase(app);
-        document.getElementById('loader').style.display = 'none';
+        // سيتم إخفاء اللودر فقط بعد وصول البيانات
     } catch(e) {
         document.getElementById('loader').innerHTML = "<div style='color:red'>خطأ في الاتصال بالسيرفر!</div>";
         console.error(e);
@@ -475,20 +482,17 @@
     let transactions = [];
     const transactionsRef = ref(db, 'transactions');
     const vacancyRef = ref(db, 'vacancies');
-
-    // متغير للوقت
     let lastReportTime = 0;
 
     onValue(transactionsRef, (snapshot) => {
         const data = snapshot.val();
         transactions = [];
-        lastReportTime = 0; // reset finding
+        lastReportTime = 0; 
         
         if (data) {
             Object.keys(data).forEach(key => {
                 const t = { ...data[key], firebaseKey: key };
                 transactions.push(t);
-                // البحث عن آخر تقرير (بدون رقم غرفة)
                 if (!t.roomNumber && t.actionTime) {
                     const tTime = new Date(t.actionTime).getTime();
                     if (tTime > lastReportTime) lastReportTime = tTime;
@@ -498,6 +502,10 @@
         }
         updateUI();
         checkReportTimer();
+        
+        // إخفاء اللودر عند وصول البيانات
+        document.getElementById('loader').style.opacity = '0';
+        setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 500);
     });
 
     onValue(vacancyRef, (snapshot) => {
@@ -506,7 +514,6 @@
         document.getElementById('vac2Input').value = data.v2;
         document.getElementById('book1Input').value = data.b1 || '';
         document.getElementById('book2Input').value = data.b2 || '';
-        
         updateTopCounters(data.v1, data.v2, data.b1, data.b2);
     });
 
@@ -515,7 +522,6 @@
         const now = Date.now();
         const fourHours = 4 * 60 * 60 * 1000;
         const diff = now - lastReportTime;
-        
         const body = document.body;
         const header = document.getElementById('mainHeader');
         const cashCard = document.getElementById('cashCard');
@@ -523,14 +529,12 @@
         const alertBox = document.getElementById('reportAlert');
 
         if (lastReportTime > 0 && diff > fourHours) {
-            // تفعيل وضع الخطر
             body.classList.add('danger-mode');
             header.classList.add('danger-element');
             cashCard.classList.add('danger-element');
             netCard.classList.add('danger-element');
             alertBox.style.display = 'block';
         } else {
-            // إيقاف وضع الخطر
             body.classList.remove('danger-mode');
             header.classList.remove('danger-element');
             cashCard.classList.remove('danger-element');
@@ -538,8 +542,6 @@
             alertBox.style.display = 'none';
         }
     }
-    
-    // فحص المؤقت كل دقيقة
     setInterval(checkReportTimer, 60000);
 
     window.showGlassToast = function(msg, icon = '✅') {
@@ -567,7 +569,6 @@
 
         document.getElementById('count-1bhk').innerText = net1;
         document.getElementById('count-2bhk').innerText = net2;
-        
         document.getElementById('detail-1bhk').innerText = `(متاح للحجز ${net1} - محجوز ${b1})`;
         document.getElementById('detail-2bhk').innerText = `(متاح للحجز ${net2} - محجوز ${b2})`;
 
@@ -600,19 +601,11 @@
             totalInput.readOnly = false; 
             totalInput.style.backgroundColor = "#f8fafc";
             totalInput.value = '';
-            
-            nightsInput.value = 30; 
-            nightsInput.readOnly = true; 
-            nightsInput.style.backgroundColor = "#e2e8f0";
+            nightsInput.value = 30; nightsInput.readOnly = true; nightsInput.style.backgroundColor = "#e2e8f0";
         } else {
             dailyRateDiv.style.display = 'block'; 
-            totalInput.readOnly = true; 
-            totalInput.style.backgroundColor = "#e2e8f0";
-            totalInput.value = '';
-            
-            nightsInput.value = ''; 
-            nightsInput.readOnly = false; 
-            nightsInput.style.backgroundColor = "#f8fafc";
+            totalInput.readOnly = true; totalInput.style.backgroundColor = "#e2e8f0"; totalInput.value = '';
+            nightsInput.value = ''; nightsInput.readOnly = false; nightsInput.style.backgroundColor = "#f8fafc";
         }
         window.calculateCheckout();
     }
@@ -621,8 +614,7 @@
         if (document.getElementById('rentType').value !== 'يومي') return;
         const rate = parseFloat(document.getElementById('dailyRate').value) || 0;
         const nights = parseFloat(document.getElementById('nightsCount').value) || 0;
-        const total = rate * nights;
-        document.getElementById('totalRentAmount').value = total;
+        document.getElementById('totalRentAmount').value = rate * nights;
         window.calculateRemaining();
         window.calculateCheckout();
     }
@@ -633,18 +625,15 @@
         const mixedSec = document.getElementById('mixedSection');
         const paidInput = document.getElementById('paidAmount');
 
-        bankSec.style.display = 'none';
-        mixedSec.style.display = 'none';
-        paidInput.readOnly = false;
-        paidInput.style.backgroundColor = "#f8fafc";
+        bankSec.style.display = 'none'; mixedSec.style.display = 'none';
+        paidInput.readOnly = false; paidInput.style.backgroundColor = "#f8fafc";
 
         if (method === 'تحويل') {
             bankSec.style.display = 'block';
             document.getElementById('bankStatusSelect').setAttribute('required', 'required');
         } else if (method === 'مختلط') {
             mixedSec.style.display = 'block';
-            paidInput.readOnly = true;
-            paidInput.style.backgroundColor = "#e2e8f0";
+            paidInput.readOnly = true; paidInput.style.backgroundColor = "#e2e8f0";
             window.calculateMixedTotal();
         } else {
             document.getElementById('bankStatusSelect').removeAttribute('required');
@@ -676,7 +665,6 @@
     window.updateButtonState = function() {
         const roomNum = document.getElementById('roomNumber').value;
         const btn = document.getElementById('saveBtn');
-        
         if (!roomNum) {
             btn.innerText = "إرسال تقرير الإشغال 📝";
             btn.classList.add('btn-status-mode');
@@ -690,32 +678,24 @@
 
     document.getElementById('checkinForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        
         window.saveVacanciesToCloud();
 
         const roomNum = document.getElementById('roomNumber').value;
         
         if (!roomNum) {
             window.sendStatusWhatsapp();
-            
-            // تسجيل التقرير في قاعدة البيانات لضبط المؤقت
-            const reportData = {
-                actionTime: new Date().toISOString(),
-                isReport: true // علامة لتمييز التقرير
-            };
+            const reportData = { actionTime: new Date().toISOString(), isReport: true };
             push(transactionsRef, reportData);
-
             showGlassToast('تم تحديث الحالة وإرسال التقرير 📝', 'ℹ️');
             return;
         }
 
-        // التحقق اليدوي للبيانات عند الحجز
         const checkIn = document.getElementById('checkInDate').value;
         const nights = document.getElementById('nightsCount').value;
         const amt = document.getElementById('paidAmount').value;
 
         if(!checkIn || !nights || !amt) {
-            alert('يرجى استكمال بيانات الحجز (التاريخ، الليالي، المبلغ)');
+            alert('يرجى استكمال بيانات الحجز');
             return;
         }
 
@@ -777,7 +757,7 @@
         window.updateButtonState(); 
     });
 
-    // 1. رسالة الحجز (الخضراء)
+    // 1. رسالة الحجز
     window.sendWhatsapp = function(data) {
         let moneyDetails = `*💰 المدفوع:* ${data.amount} ريال`;
         if (data.totalContract > data.amount) {
@@ -789,7 +769,6 @@
         const b1 = document.getElementById('book1Input').value;
         const b2 = document.getElementById('book2Input').value;
         
-        // حساب الصافي
         const net1 = Math.max(0, (v1||0) - (b1||0));
         const net2 = Math.max(0, (v2||0) - (b2||0));
 
@@ -822,7 +801,7 @@ ${moneyDetails}
         window.open(url, '_blank');
     }
 
-    // 2. رسالة الإشغال (الزرقاء)
+    // 2. رسالة الإشغال
     window.sendStatusWhatsapp = function() {
         const v1 = document.getElementById('vac1Input').value || 0;
         const v2 = document.getElementById('vac2Input').value || 0;
@@ -834,10 +813,8 @@ ${moneyDetails}
         
         const now = new Date();
         const nowStr = now.toLocaleTimeString('ar-EG', {hour: 'numeric', minute:'numeric'});
-        
         const next = new Date(now.getTime() + 4*60*60*1000);
         const nextStr = next.toLocaleTimeString('ar-EG', {hour: 'numeric', minute:'numeric'});
-        
         const fullDate = now.toLocaleString('ar-EG');
 
         const text = `-----------------------------
@@ -864,7 +841,6 @@ ${moneyDetails}
         let hasNew = false, hasPending = false;
 
         transactions.forEach((t) => {
-            // تجاهل سجلات التقارير
             if (!t.roomNumber) return;
 
             if (t.isHandedOver === false) hasNew = true;
