@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
-    <title>منظومة إيجار يومي شهري مختلط - V34 Ultimate Fixed</title>
+    <title>منظومة إيجار يومي شهري مختلط - V34 FINAL FIX</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
+        
+        /* 💡 FIX: ضمان الخلفية البيضاء فوراً لمنع وميض الشاشة السوداء في الوضع الليلي */
+        html { 
+            background-color: var(--bg-color); 
+        }
         
         :root {
             --header-bg: #334155; 
@@ -771,7 +776,7 @@ ${advice2}
         window.open(url, '_blank');
     }
     
-    // --- دالة رسالة الإشغال (المعدلة) ---
+    // --- دالة رسالة الإشغال (المعدلة والمصححة لخلل التعطل) ---
     window.sendStatusWhatsapp = function() {
         const v1 = parseInt(document.getElementById('vac1Input').value) || 0;
         const v2 = parseInt(document.getElementById('vac2Input').value) || 0;
