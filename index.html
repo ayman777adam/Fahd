@@ -8,29 +8,28 @@
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
         
         :root {
-            /* --- New Tanafos Color Palette --- */
-            --bg-body: #f4f6f8;       /* خلفية رمادية فاتحة جداً */
+            /* --- New Tanafos Palette --- */
+            --bg-body: #f4f6f8;       /* رمادي فاتح جداً */
             --bg-card: #ffffff;
-            --text-main: #37474f;     /* رمادي غامق للنصوص */
-            --text-sec: #78909c;      /* رمادي مزرق للعناوين الفرعية */
+            --text-main: #37474f;     /* رمادي غامق */
+            --text-sec: #78909c;
             --border-color: #cfd8dc;
             
-            --primary: #0097a7;       /* اللون التركواز الأساسي */
-            --primary-light: #e0f7fa; /* خلفية تركواز فاتحة جداً */
+            --primary: #0097a7;       /* تركواز أساسي */
+            --primary-light: #e0f7fa; /* خلفية تركواز فاتحة */
             
-            /* Functional Colors (Preserved) */
             --success: #00b894;
             --danger: #d63031;
             --warning: #f1c40f;
-            --booking-blue: #0288d1;  /* تم تعديله قليلاً ليتماشى مع الثيم */
+            --booking-blue: #0288d1;  /* أزرق متناسق مع التركواز */
             
-            --shadow: 0 4px 20px rgba(0, 151, 167, 0.08); /* ظل خفيف بلون الثيم */
+            --shadow: 0 4px 15px rgba(0, 151, 167, 0.08); /* ظل ملون خفيف */
         }
 
         body {
             font-family: 'Tajawal', sans-serif;
             background-color: var(--bg-body);
-            /* نقش نقاط خفيف جداً بدلاً من الخطوط الذهبية */
+            /* نقش نقاط خفيف ونظيف */
             background-image: radial-gradient(#b0bec5 1px, transparent 1px);
             background-size: 20px 20px;
             
@@ -49,9 +48,9 @@
 
         .container { max-width: 600px; margin: 0 auto; }
 
-        /* --- Header Glass (Clean White) --- */
+        /* --- Header Glass (Clean Style) --- */
         .header-glass {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             border: 1px solid #fff;
             border-radius: 20px; padding: 15px; margin-bottom: 20px;
@@ -63,10 +62,9 @@
         .dashboard { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
         .card { 
             background: var(--bg-card); border-radius: 16px; padding: 10px; 
-            position: relative; box-shadow: var(--shadow);
+            position: relative; box-shadow: var(--shadow); border: 1px solid var(--border-color);
             display: flex; flex-direction: column; align-items: center;
             border-bottom: 3px solid transparent; transition: 0.2s;
-            border: 1px solid var(--border-color);
         }
         
         .chart-container { position: relative; width: 55px; height: 55px; margin-bottom: 5px; }
@@ -78,12 +76,12 @@
         .card h3 { margin: 0; font-size: 0.7rem; color: var(--text-sec); text-align: center; font-weight: 700; }
         .card-detail { font-size: 0.6rem; color: #90a4ae; margin-top: 2px; }
 
-        /* Room Colors (Softened to match theme) */
-        .c-single .circle { stroke: #26c6da; } /* Cyan */
-        .c-1bhk .circle { stroke: #ffca28; }   /* Amber */
-        .c-2bhk .circle { stroke: #7e57c2; }   /* Soft Purple */
+        /* Soft Colors for Charts */
+        .c-single .circle { stroke: #26c6da; }
+        .c-1bhk .circle { stroke: #ffca28; }
+        .c-2bhk .circle { stroke: #7e57c2; }
 
-        /* --- Steppers (Clean Look) --- */
+        /* --- Steppers (Clean Tanafos Style) --- */
         .stepper-box {
             background: #fff; padding: 15px; border-radius: 15px; margin-top: 15px;
             border: 1px solid var(--border-color); box-shadow: var(--shadow);
@@ -119,7 +117,7 @@
         /* --- Sticky Footer --- */
         .sticky-footer {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border-top: 1px solid var(--border-color);
             padding: 15px 15px 10px 15px;
@@ -134,6 +132,7 @@
             font-weight: 800; font-size: 0.7rem; display: flex; align-items: center; justify-content: center;
             white-space: nowrap;
         }
+        /* Soft Pastel Pills */
         .pill-green { background: #e0f2f1; color: #00695c; border: 1px solid #80cbc4; }
         .pill-red { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
         
@@ -141,29 +140,30 @@
         .btn-whatsapp {
             flex: 1; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 10px;
             font-size: 14px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;
-            box-shadow: 0 4px 15px rgba(0, 151, 167, 0.3); /* ظل تركواز */
+            box-shadow: 0 4px 15px rgba(0, 151, 167, 0.25);
         }
         .dev-credit { text-align: center; font-size: 0.65rem; color: #90a4ae; margin-top: 5px; }
 
-        /* --- Inputs & Forms --- */
+        /* --- Forms & Inputs --- */
         .form-box { background: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: var(--shadow); border: 1px solid var(--border-color); }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         .full-width { grid-column: span 3; }
         input, select {
             width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px;
-            font-size: 14px; background: #fff; box-sizing: border-box; font-family: 'Tajawal';
-            color: var(--text-main);
+            font-size: 14px; background: #fff; box-sizing: border-box; font-family: 'Tajawal'; color: var(--text-main);
         }
         input:focus, select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px var(--primary-light); }
         
+        /* --- Action Buttons --- */
         .action-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
         .btn-action {
             border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;
             color: white; font-size: 11px; display: flex; flex-direction: column; align-items: center;
-            background: #546e7a; /* Default Gray-Blue */
+            background: #546e7a; /* Default Slate Blue */
         }
         .btn-close { background: #0277bd; } .btn-print { background: #f9a825; } .btn-excel { background: #2e7d32; }
         
+        /* --- Finance Cards --- */
         .finance-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .finance-card {
             background: white; padding: 12px; border-radius: 10px; text-align: center;
@@ -171,7 +171,7 @@
         }
         .finance-val { font-size: 22px; font-weight: 800; color: var(--text-main); }
         
-        /* Table Styling */
+        /* --- History Table --- */
         .history-box { background: white; padding: 10px; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid var(--border-color); }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         th { background: var(--primary-light); padding: 8px 2px; color: var(--primary); font-size: 10px; text-align: center; border-bottom: 2px solid var(--border-color); }
