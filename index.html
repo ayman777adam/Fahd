@@ -305,8 +305,27 @@
                 <input type="number" id="mixedNet" placeholder="شبكة" oninput="calculateMixedTotal()">
                 <input type="number" id="mixedBank" placeholder="تحويل" oninput="calculateMixedTotal()">
             </div>
+            
             <div id="bankSection" style="display:none; margin-top:5px;">
-                <select id="bankStatusSelect"><option value="confirmed">✅ تم الاستلام</option><option value="pending">⏳ لم يؤكد</option></select>
+                <select id="bankStatusSelect" onchange="toggleImageUpload()">
+                    <option value="confirmed">✅ تم الاستلام</option>
+                    <option value="pending">⏳ لم يؤكد</option>
+                </select>
+                <div id="bankProofSection" style="display:none; margin-top:10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+                    <label style="font-weight:bold; color:var(--primary);">صورة إثبات التحويل (إلزامي):</label>
+                    
+                    <div style="display:flex; gap: 8px; margin-top: 5px;">
+                        <button type="button" class="btn-action" style="background:#5e35b1; flex: 1;" onclick="document.getElementById('cameraInput').click()">📸 كاميرا</button>
+                        <button type="button" class="btn-action" style="background:#0288d1; flex: 1;" onclick="document.getElementById('fileInput').click()">📁 رفع ملف (صورة/PDF)</button>
+                    </div>
+
+                    <div id="fileNameDisplay" style="margin-top: 8px; font-size: 0.8rem; font-weight: bold; color: var(--success);"></div>
+                    
+                    <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display:none;">
+                    <input type="file" id="fileInput" accept="image/*, application/pdf" style="display:none;">
+
+                    <input type="file" id="bankProofImage" style="display:none;"> 
+                </div>
             </div>
 
             <div class="stepper-box">
@@ -422,6 +441,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"; // تم الإضافة
 
     const firebaseConfig = {
       apiKey: "AIzaSyBY09i3QHvaZFmNpOUHYEIFoU_3dJvycso",
@@ -433,10 +453,11 @@
       appId: "1:134497063312:web:d8f589f291d55a85a2e315"
     };
 
-    let app, db;
+    let app, db, storage; // تم التعديل
     try {
         app = initializeApp(firebaseConfig);
         db = getDatabase(app);
+        storage = getStorage(app); // تم الإضافة
     } catch(e) {
         document.getElementById('loaderText').innerHTML = "خطأ في النظام";
     }
@@ -557,8 +578,10 @@
             else { statusText = '<span class="status-new">🆕 جديد</span>'; }
 
             let paymentDisplay = t.paymentMethod;
+            // تم تحديث هذا السطر ليسمح بالضغط على حالة "تم الاستلام" إذا كان هناك رابط صورة
             if (t.paymentMethod.includes('لم يؤكد')) paymentDisplay = `<span class="pending-transfer" onclick="toggleBankStatus('${t.firebaseKey}', '${t.paymentMethod}')">${t.paymentMethod}</span>`;
-            else if (t.paymentMethod.includes('تم الاستلام')) paymentDisplay = `<span class="confirmed-transfer">${t.paymentMethod}</span>`;
+            else if (t.paymentMethod.includes('تم الاستلام')) paymentDisplay = `<span class="confirmed-transfer" ${t.proofUrl ? `onclick="window.open('${t.proofUrl}', '_blank')"` : ''}>${t.paymentMethod}</span>`;
+
 
             const dateObj = new Date(t.checkIn);
             let dateDisplay = t.checkIn;
@@ -651,11 +674,27 @@
         d.setDate(d.getDate() + parseInt(nights));
         document.getElementById('checkOutDate').value = d.toLocaleDateString('en-GB');
     }
+    
+    // تم إضافة هذه الوظيفة للتحكم بالظهور
+    window.toggleImageUpload = function() {
+        const paymentMethod = document.getElementById('paymentMethod').value;
+        const status = document.getElementById('bankStatusSelect').value;
+        const proofSection = document.getElementById('bankProofSection');
+
+        if (paymentMethod === 'تحويل' && status === 'confirmed') {
+            proofSection.style.display = 'block';
+        } else {
+            proofSection.style.display = 'none';
+        }
+    }
+    
     window.togglePaymentSections = function() {
         const m = document.getElementById('paymentMethod').value;
         document.getElementById('mixedSection').style.display = m==='مختلط'?'grid':'none';
         document.getElementById('bankSection').style.display = m==='تحويل'?'block':'none';
         if(m!=='مختلط') document.getElementById('paidAmount').readOnly = false;
+        
+        window.toggleImageUpload(); 
     }
     window.calculateMixedTotal = function() {
         const tot = (parseFloat(document.getElementById('mixedCash').value)||0) + (parseFloat(document.getElementById('mixedNet').value)||0) + (parseFloat(document.getElementById('mixedBank').value)||0);
@@ -679,6 +718,39 @@
     window.showToast = function(m) { const t=document.getElementById('toastMsg'); document.getElementById('toastText').innerText=m; document.getElementById('toast-container').style.opacity=1; setTimeout(()=>document.getElementById('toast-container').style.opacity=0,2000); }
     window.exportToExcel = function() { if(!transactions.length)return; const d=transactions.map(t=>({"الغرفة":t.roomNumber,"المبلغ":t.amount,"الدفع":t.paymentMethod,"دخول":t.checkIn})); const ws=XLSX.utils.json_to_sheet(d); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Report"); XLSX.writeFile(wb,"Report.xlsx"); }
 
+    // تم إضافة معالجات الملفات الجديدة هنا
+    document.addEventListener('DOMContentLoaded', () => {
+        const cameraInput = document.getElementById('cameraInput');
+        const fileInput = document.getElementById('fileInput');
+        const bankProofImage = document.getElementById('bankProofImage');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+        // Helper function to handle file selection and update UI
+        const handleFileSelection = (sourceInput) => {
+            const file = sourceInput.files[0];
+            if (file) {
+                // 1. Clear the previous input content and copy the file
+                bankProofImage.files = sourceInput.files;
+                // 2. Update the display name
+                fileNameDisplay.innerText = `تم اختيار الملف: ${file.name}`;
+                fileNameDisplay.style.color = 'var(--success)';
+            }
+        };
+
+        // Listeners for the two visual inputs
+        if (cameraInput) {
+            cameraInput.addEventListener('change', () => handleFileSelection(cameraInput));
+        }
+        if (fileInput) {
+            fileInput.addEventListener('change', () => handleFileSelection(fileInput));
+        }
+
+        // We run toggleImageUpload here to set the initial state
+        window.toggleImageUpload(); 
+    });
+
+
+    // تم إحلال هذه الوظيفة بالكامل
     document.getElementById('checkinForm').addEventListener('submit', function(e){
         e.preventDefault();
         window.saveVacanciesToCloud();
@@ -690,7 +762,7 @@
         const generateRec = (v,b,name) => {
             const vac=parseInt(v)||0, book=parseInt(b)||0;
             if(book>=vac && vac>0) return `⛔ قفل بوكينج (${name}) فوراً عندك فائض ${book-vac}`;
-            if(vac>=5 && book<vac) return `✅ فتح عدد ${vac-book} (${name}) على بوكينج`;
+            if(vac>=5 && book<vac) return `✅ افتح عدد ${vac-book} (${name}) على بوكينج`;
             return null;
         };
         const recs = [generateRec(v3,b3,'مفرد'), generateRec(v1,b1,'غرفة وصالة'), generateRec(v2,b2,'غرفتين')].filter(r=>r);
@@ -726,24 +798,75 @@
         if(data.paymentMethod === 'مختلط') {
             data.mixDetails = { cash: document.getElementById('mixedCash').value, net: document.getElementById('mixedNet').value, bank: document.getElementById('mixedBank').value };
             data.paymentMethod = `مختلط (${data.mixDetails.cash} كاش + ${data.mixDetails.net} شبكة + ${data.mixDetails.bank} تحويل)`;
-        } else if (data.paymentMethod === 'تحويل') {
-            const s = document.getElementById('bankStatusSelect').value;
-            data.paymentMethod += (s==='confirmed') ? ' (تم الاستلام ✅)' : ' (لم يؤكد ⏳)';
+        }
+        
+        const isBankTransfer = data.paymentMethod.includes('تحويل');
+        let bankStatus = '';
+        // استخدام حقل التخزين الرئيسي هنا
+        let bankProofFile = document.getElementById('bankProofImage').files[0] || null; 
+
+        if (isBankTransfer) {
+            bankStatus = document.getElementById('bankStatusSelect').value;
+            data.paymentMethod += (bankStatus === 'confirmed') ? ' (تم الاستلام ✅)' : ' (لم يؤكد ⏳)';
+            
+            if (bankStatus === 'confirmed') {
+                if (!bankProofFile) {
+                    window.showToast('⛔ يجب رفع صورة إثبات التحويل لتأكيد الاستلام.');
+                    return; 
+                }
+            }
+        }
+        
+        // وظيفة معالجة إرسال البيانات (سواء مع ملف أو بدونه)
+        const finalizeSubmission = (finalData) => {
+            push(transactionsRef, finalData);
+
+            let moneyDetails = `*💰 المدفوع:* ${finalData.amount} ريال`;
+            if (finalData.totalContract > finalData.amount) moneyDetails += `\n*📉 الإجمالي:* ${finalData.totalContract}\n*⚠️ المتبقي:* ${finalData.debt}`;
+            
+            const dateStr = new Date(finalData.checkIn).toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' });
+            const net1=(parseInt(v1)||0)-(parseInt(b1)||0), net2=(parseInt(v2)||0)-(parseInt(b2)||0), net3=(parseInt(v3)||0)-(parseInt(b3)||0);
+
+            const txt = `تقرير إيجار غرفة ${finalData.roomNumber} - ${finalData.roomTypeName}\n----------------------------\nنوع العقد: ${finalData.rentType} (${finalData.bookingSource})\n${moneyDetails}\n🗓️ الدخول: ${dateStr}\n🌙 المدة: ${finalData.nights} ليالي\n📤 الخروج: ${finalData.checkOut}\n💳 الدفع: ${finalData.paymentMethod}\n${finalData.proofUrl ? `🖼️ الإيصال: ${finalData.proofUrl}\n` : ''}🔢 الشاغر: ${net3} مفرد | ${net1} غرف وصاله | ${net2} غرفتين\nمحجوز بوكينج : ${b3} مفرد و ${b1} غرفه وصاله و ${b2} غرفتين\n${recText}\n----------------------------\n🕒: ${new Date(finalData.actionTime).toLocaleString('ar-EG')}`;
+            
+            window.open(`https://wa.me/?text=${encodeURIComponent(txt.trim())}`, '_blank');
+            
+            this.reset(); setupDateDropdown(); updateButtonState();
+            document.getElementById('bankProofSection').style.display = 'none'; 
+            document.getElementById('loader').style.display = 'none'; 
+            window.toggleImageUpload(); 
+            
+            // مسح الملفات بعد الإرسال لضمان عدم بقائها في حقل التخزين الرئيسي
+            document.getElementById('bankProofImage').value = null; 
         }
 
-        push(transactionsRef, data);
-
-        let moneyDetails = `*💰 المدفوع:* ${data.amount} ريال`;
-        if (data.totalContract > data.amount) moneyDetails += `\n*📉 الإجمالي:* ${data.totalContract}\n*⚠️ المتبقي:* ${data.debt}`;
-        
-        const dateStr = new Date(data.checkIn).toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' });
-        const net1=(parseInt(v1)||0)-(parseInt(b1)||0), net2=(parseInt(v2)||0)-(parseInt(b2)||0), net3=(parseInt(v3)||0)-(parseInt(b3)||0);
-
-        const txt = `تقرير إيجار غرفة ${data.roomNumber} - ${data.roomTypeName}\n----------------------------\nنوع العقد: ${data.rentType} (${data.bookingSource})\n${moneyDetails}\n🗓️ الدخول: ${dateStr}\n🌙 المدة: ${data.nights} ليالي\n📤 الخروج: ${data.checkOut}\n💳 الدفع: ${data.paymentMethod}\n🔢 الشاغر: ${net3} مفرد | ${net1} غرف وصاله | ${net2} غرفتين\nمحجوز بوكينج : ${b3} مفرد و ${b1} غرفه وصاله و ${b2} غرفتين\n${recText}\n----------------------------\n🕒: ${new Date(data.actionTime).toLocaleString('ar-EG')}`;
-        
-        window.open(`https://wa.me/?text=${encodeURIComponent(txt.trim())}`, '_blank');
-        
-        this.reset(); setupDateDropdown(); updateButtonState();
+        // -----------------------------------------------------
+        // معالجة الرفع إلى Firebase Storage
+        // -----------------------------------------------------
+        if (bankProofFile && isBankTransfer && bankStatus === 'confirmed') {
+            document.getElementById('loaderText').innerText = 'جاري رفع الإيصال...';
+            document.getElementById('loader').style.display = 'flex';
+            
+            const fileExtension = bankProofFile.name.split('.').pop();
+            const path = `bank_proofs/${data.roomNumber}_${data.id}.${fileExtension}`;
+            const imageRef = storageRef(storage, path);
+            
+            uploadBytes(imageRef, bankProofFile).then((snapshot) => {
+                getDownloadURL(snapshot.ref).then((downloadURL) => {
+                    data.proofUrl = downloadURL; 
+                    window.showToast('✅ تم رفع الإيصال بنجاح.');
+                    finalizeSubmission(data);
+                });
+            }).catch((error) => {
+                document.getElementById('loader').style.display = 'none';
+                console.error("Firebase Storage Upload Error:", error);
+                window.showToast('❌ فشل رفع الإيصال. حاول مجدداً.');
+            });
+            
+        } else {
+            // إذا لم يكن هناك ملف للرفع (نقدي، شبكة، أو تحويل غير مؤكد)
+            finalizeSubmission(data);
+        }
     });
 
     setupDateDropdown();
@@ -752,4 +875,4 @@
     updateButtonState();
 </script>
 </body>
-</html>
+    </html>
