@@ -279,17 +279,17 @@
                 <div class="full-width"><label>مصدر الحجز</label><select id="bookingSource"><option value="استقبال">استقبال</option><option value="بوكينج">بوكينج</option></select></div>
                 <div class="full-width"><label>التاريخ</label><select id="checkInDate" onchange="calculateCheckout()"></select></div>
                 <div><label>النوع</label><select id="rentType" onchange="toggleRentType()"><option value="يومي">يومي</option><option value="شهري">شهري</option></select></div>
-                <div><label>الليالي</label><input type="number" id="nightsCount" min="1" oninput="calculateDailyTotal()"></div>
+                <div><label>الليالي</label><input type="number" id="nightsCount" min="1" step="1" oninput="calculateDailyTotal()"></div>
                 <div class="full-width"><label>الخروج</label><input type="text" id="checkOutDate" readonly style="background:#eceff1;"></div>
-                <div><label>رقم الغرفة</label><input type="number" id="roomNumber" placeholder="101" oninput="updateButtonState()"></div>
+                <div><label>رقم الغرفة</label><input type="number" id="roomNumber" placeholder="101" step="1" oninput="updateButtonState()"></div>
                 <div><label>نوع الغرفة</label><select id="roomTypeInput"><option value="single">مفرد</option><option value="1bhk">وصالة</option><option value="2bhk">غرفتين</option></select></div>
             </div>
 
-            <div id="dailyRateDiv" style="margin-top:10px;"><label style="color:var(--booking-blue)">السعر (اليومي)</label><input type="number" id="dailyRate" oninput="calculateDailyTotal()"></div>
+            <div id="dailyRateDiv" style="margin-top:10px;"><label style="color:var(--booking-blue)">السعر (اليومي)</label><input type="number" id="dailyRate" step="0.01" oninput="calculateDailyTotal()"></div>
             <div class="form-grid" style="margin-top:10px;">
-                <div class="full-width"><label>الإجمالي</label><input type="number" id="totalRentAmount" oninput="calculateRemaining()"></div>
-                <div><label>المدفوع</label><input type="number" id="paidAmount" oninput="calculateRemaining()"></div>
-                <div><label>المتبقي</label><input type="number" id="remainingAmount" readonly style="background:#eceff1;"></div>
+                <div class="full-width"><label>الإجمالي</label><input type="number" id="totalRentAmount" step="0.01" oninput="calculateRemaining()"></div>
+                <div><label>المدفوع</label><input type="number" id="paidAmount" step="0.01" oninput="calculateRemaining()"></div>
+                <div><label>المتبقي</label><input type="number" id="remainingAmount" step="0.01" readonly style="background:#eceff1;"></div>
             </div>
 
             <div style="margin-top:10px;">
@@ -301,9 +301,9 @@
             </div>
             
             <div id="mixedSection" style="display:none; margin-top:5px;" class="form-grid">
-                <input type="number" id="mixedCash" placeholder="كاش" oninput="calculateMixedTotal()">
-                <input type="number" id="mixedNet" placeholder="شبكة" oninput="calculateMixedTotal()">
-                <input type="number" id="mixedBank" placeholder="تحويل" oninput="calculateMixedTotal()">
+                <input type="number" id="mixedCash" step="0.01" placeholder="كاش" oninput="calculateMixedTotal()">
+<input type="number" id="mixedNet" step="0.01" placeholder="شبكة" oninput="calculateMixedTotal()">
+<input type="number" id="mixedBank" step="0.01" placeholder="تحويل" oninput="calculateMixedTotal()">
             </div>
             
             <div id="bankSection" style="display:none; margin-top:5px;">
@@ -659,7 +659,8 @@
     }
     window.calculateDailyTotal = function() {
         const r = parseFloat(document.getElementById('dailyRate').value)||0;
-        const n = parseFloat(document.getElementById('nightsCount').value)||0;
+        // يتم تحويل الليالي إلى رقم صحيح (إزالة الكسور)
+        const n = parseInt(document.getElementById('nightsCount').value)||0; 
         if(document.getElementById('rentType').value==='يومي') document.getElementById('totalRentAmount').value = r*n;
         calculateRemaining(); calculateCheckout();
     }
@@ -671,7 +672,9 @@
         const nights = document.getElementById('nightsCount').value;
         if (!dateVal || !nights) { document.getElementById('checkOutDate').value = ''; return; }
         const d = new Date(dateVal);
-        d.setDate(d.getDate() + parseInt(nights));
+        // استخدام Math.floor لضمان أن الليالي عدد صحيح موجب (يتم تجاهل 0.6 ليلة مثلاً)
+        const wholeNights = Math.floor(parseFloat(nights)); 
+        d.setDate(d.getDate() + wholeNights);
         document.getElementById('checkOutDate').value = d.toLocaleDateString('en-GB');
     }
     
@@ -703,9 +706,12 @@
         calculateRemaining();
     }
     window.updateButtonState = function() {
-        const r = document.getElementById('roomNumber').value;
+        // استخدام parseInt لحذف الكسور من رقم الغرفة قبل التحقق من قيمته
+        const r = parseInt(document.getElementById('roomNumber').value); 
         const b = document.getElementById('saveBtn');
-        if(!r) { b.innerText='إرسال تقرير حالة 📝'; b.style.background='var(--booking-blue)'; }
+        if(isNaN(r)) { // تعديل للتحقق من أن القيمة ليست 'NaN' (أي لا تحتوي على رقم صحيح)
+            b.innerText='إرسال تقرير حالة 📝'; b.style.background='var(--booking-blue)'; 
+        }
         else { b.innerText='حفظ وإرسال 🚀'; b.style.background='var(--success)'; }
     }
 
@@ -868,6 +874,59 @@
             finalizeSubmission(data);
         }
     });
+
+    
+
+  // ----------------- منطق التحقق من المدخلات (معدل لمنع النقطة نهائياً) -----------------
+
+    // 1. تعريف الحقول المالية (تقبل الكسور)
+    const moneyFieldsIds = [
+        "dailyRate",
+        "totalRentAmount",
+        "paidAmount",
+        "remainingAmount",
+        "mixedCash",
+        "mixedNet",
+        "mixedBank"
+    ];
+
+    // 2. معالجة جميع حقول الأرقام في الصفحة
+    document.querySelectorAll('input[type="number"]').forEach(inp => {
+        
+        // التحقق هل الحقل مالي أم لا
+        if (moneyFieldsIds.includes(inp.id)) {
+            // --- أ: حقل مالي (يسمح بالكسور) ---
+            inp.addEventListener("input", () => {
+                // السماح فقط بأرقام ونقطة واحدة، ومنزلتين عشريتين
+                if (inp.value.includes('.')) {
+                   const parts = inp.value.split('.');
+                   if (parts[1].length > 2) {
+                       inp.value = parseFloat(inp.value).toFixed(2);
+                   }
+                }
+            });
+        } else {
+            // --- ب: حقل غير مالي (ممنوع الكسور والنقطة نهائياً) ---
+            
+            // 1. منع الكتابة من الكيبورد (نقطة، فاصلة، حروف)
+            inp.addEventListener("keydown", (e) => {
+                // هنا نمنع زر النقطة (.) والفاصلة (,) و حرف e و E والرموز + -
+                // بمجرد الضغط، يتم إلغاء الحدث ولن يظهر شيء في الحقل
+                if (["." , "," , "e", "E", "+", "-"].includes(e.key)) {
+                    e.preventDefault();
+                }
+            });
+
+            // 2. تنظيف عند اللصق (Paste)
+            inp.addEventListener("input", (e) => {
+               // إذا حاول المستخدم الالتفاف ولصق رقم بكسور، نقوم بمسح الكسور فوراً
+               // أو نحذف أي شيء ليس رقماً
+               inp.value = inp.value.replace(/[^\d]/g, "");
+            });
+        }
+    });
+
+// ----------------- نهاية الكود المعدل -----------------
 
     setupDateDropdown();
     toggleRentType();
