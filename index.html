@@ -2,36 +2,102 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
     <title>منظومة إيجار يومي شهري مختلط - V34 Ultimate</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
         :root {
-            --header-bg: #334155; 
-            --accent-color: #d4af37;
-            --bg-color: #f9f8f2;
+            /* 🎨 Modern Color Palette - Inspired by Global Projects */
+            --header-bg: #0f172a;
+            --header-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            --accent-color: #f59e0b;
+            --accent-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            
+            /* Background Colors */
+            --bg-color: #f8fafc;
+            --bg-gradient: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
             --card-bg: #ffffff;
-            --text-color: #1e293b;
+            --card-hover: #fafbfc;
+            
+            /* Text Colors */
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --text-muted: #94a3b8;
+            --text-color: var(--text-primary);
+            
+            /* Status Colors */
             --danger-color: #ef4444;
+            --danger-light: #fee2e2;
             --success-color: #10b981;
+            --success-light: #d1fae5;
             --warning-color: #f59e0b;
-            --booking-blue: #003580;
-            --status-btn-color: #3b82f6;
-            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --warning-light: #fef3c7;
+            --info-color: #3b82f6;
+            --info-light: #dbeafe;
+            
+            /* Brand Colors */
+            --booking-blue: #1e40af;
+            --status-btn-color: #2563eb;
+            --purple-accent: #7c3aed;
+            
+            /* Section Colors */
+            --section-primary: #2563eb;
+            --section-primary-light: #3b82f6;
+            --section-secondary: #7c3aed;
+            --section-success: #059669;
+            --section-warning: #d97706;
+            
+            /* Shadows - Modern & Soft */
+            --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            
+            /* Legacy Support */
+            --shadow-soft: var(--shadow-md);
+            --shadow-medium: var(--shadow-lg);
+            --shadow-large: var(--shadow-xl);
+            
+            /* Borders */
+            --border-color: #e2e8f0;
+            --border-color-light: #f1f5f9;
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 16px;
+            --border-radius-xl: 20px;
+            
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
         }
 
         body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: var(--bg-color);
+            font-family: 'Tajawal', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
             background-image: 
-                repeating-linear-gradient(45deg, rgba(212, 175, 55, 0.03) 0, rgba(212, 175, 55, 0.03) 1px, transparent 0, transparent 50px),
-                repeating-linear-gradient(-45deg, rgba(212, 175, 55, 0.03) 0, rgba(212, 175, 55, 0.03) 1px, transparent 0, transparent 50px);
-            background-size: 71px 71px;
+                radial-gradient(circle at 20% 50%, rgba(37, 99, 235, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(124, 58, 237, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(245, 158, 11, 0.02) 0%, transparent 50%);
             background-attachment: fixed;
-            margin: 0; padding: 15px; color: var(--text-color);
-            padding-bottom: 50px;
+            margin: 0; 
+            padding: 12px; 
+            color: var(--text-primary);
+            padding-bottom: 60px;
             transition: background-color 0.5s;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-size: 14px;
         }
 
         .danger-mode { animation: bg-pulse 2s infinite alternate; }
@@ -44,7 +110,13 @@
         .danger-element .finance-val, .danger-element h4 { color: white !important; }
         @keyframes pulse-border { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-        .container { max-width: 600px; margin: 0 auto; position: relative; z-index: 1; }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            position: relative; 
+            z-index: 1;
+            padding: 0 4px;
+        }
 
         input[type=number]::-webkit-outer-spin-button,
         input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -68,54 +140,300 @@
         }
 
         .main-header {
-            background: var(--header-bg); color: white; padding: 15px; border-radius: 12px;
-            text-align: center; margin-bottom: 20px; box-shadow: var(--shadow-soft);
-            transition: background 0.5s;
+            background: var(--header-gradient);
+            color: white; 
+            padding: 28px 24px; 
+            border-radius: var(--border-radius-xl);
+            text-align: center; 
+            margin-bottom: 28px; 
+            box-shadow: var(--shadow-2xl), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
         }
-        .header-content h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-gradient);
+            background-size: 200% 100%;
+            animation: shimmer 4s ease-in-out infinite;
+        }
+        .main-header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+            0%, 100% { background-position: -200% 0; }
+            50% { background-position: 200% 0; }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        .header-content h1 { 
+            margin: 0; 
+            font-size: 22px; 
+            font-weight: 800; 
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
 
         .fixed-footer {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 30px;
-            background-color: #f1f5f9; border-top: 1px solid #cbd5e1;
-            display: flex; justify-content: center; align-items: center; z-index: 9999;
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0;
+            width: 100%; 
+            height: 40px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-top: 1px solid var(--border-color);
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 9999;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
         }
         .fixed-footer-text {
-            font-family: 'Cairo', sans-serif; font-size: 10px; color: #475569; font-weight: 700; letter-spacing: 0.5px;
+            font-family: 'Cairo', sans-serif; 
+            font-size: 10px; 
+            color: var(--text-secondary); 
+            font-weight: 700; 
+            letter-spacing: 0.5px;
+            text-align: center;
+            padding: 0 12px;
+        }
+        
+        /* Mobile Footer Adjustments */
+        @media screen and (max-width: 767px) {
+            .fixed-footer {
+                height: 44px; /* Safe area for mobile */
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            
+            .fixed-footer-text {
+                font-size: 9px;
+                padding: 0 8px;
+            }
+            
+            body {
+                padding-bottom: 84px; /* 44px footer + 40px extra space */
+            }
+        }
+        
+        @media screen and (min-width: 768px) {
+            body {
+                padding-bottom: 60px;
+            }
         }
 
         #toast-container {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 10000; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+            position: fixed; 
+            top: 20px; 
+            left: 50%; 
+            transform: translate(-50%, -100px);
+            z-index: 10000; 
+            pointer-events: none; 
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        #toast-container.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
         }
         .glass-toast {
-            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5);
-            padding: 20px 30px; border-radius: 20px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            text-align: center; font-family: 'Cairo', sans-serif; color: var(--header-bg);
-            font-weight: 700; font-size: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 2px solid rgba(239, 68, 68, 0.2);
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2), 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-family: 'Cairo', sans-serif;
+            color: var(--danger-color);
+            font-weight: 700;
+            font-size: 13px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            min-width: auto;
+            max-width: 320px;
+            animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
-        .glass-icon { font-size: 40px; margin-bottom: 5px; }
+        @keyframes toastSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.9);
+            }
+            50% {
+                transform: translateY(5px) scale(1.02);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .glass-icon { 
+            font-size: 18px; 
+            margin: 0;
+            flex-shrink: 0;
+        }
+        #toastText {
+            line-height: 1.4;
+        }
 
-        .finance-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .finance-section { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            margin-bottom: 20px; 
+        }
         .finance-card {
-            background: white; padding: 12px; border-radius: 10px; text-align: center;
-            border-top: 3px solid var(--header-bg); box-shadow: var(--shadow-soft);
-            transition: background 0.5s, border-color 0.5s;
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: var(--border-radius-lg); 
+            text-align: center;
+            border: 1px solid var(--border-color);
+            border-top: 3px solid var(--section-primary); 
+            box-shadow: var(--shadow-md);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
         }
-        .finance-val { font-size: 22px; font-weight: 800; color: var(--header-bg); }
-        .finance-card h4 { margin: 0; font-size: 12px; color: #64748b; }
-        .finance-card.net { border-top-color: #8b5cf6; }
-        .finance-card.net .finance-val { color: #8b5cf6; }
+        .finance-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .finance-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--section-primary-light);
+            background: var(--card-hover);
+        }
+        .finance-card:hover::before {
+            transform: scaleX(1);
+        }
+        .finance-val { 
+            font-size: 24px; 
+            font-weight: 800; 
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--section-primary) 0%, var(--section-primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .finance-card h4 { 
+            margin: 8px 0 0 0; 
+            font-size: 13px; 
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .finance-card.net { 
+            border-top-color: var(--section-secondary);
+        }
+        .finance-card.net .finance-val { 
+            background: linear-gradient(135deg, var(--section-secondary) 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-        .action-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
-        .btn-action {
-            border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;
-            color: white; font-family: 'Tajawal'; font-size: 11px; display: flex; flex-direction: column;
-            align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s;
+        .action-buttons { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1fr; 
+            gap: 10px; 
+            margin-bottom: 24px; 
         }
-        .btn-close { background: #3b82f6; }
-        .btn-print { background: #d97706; }
-        .btn-excel { background: #059669; }
+        .btn-action {
+            border: none; 
+            padding: 14px 20px; 
+            border-radius: var(--border-radius-md); 
+            font-weight: 700; 
+            cursor: pointer;
+            color: white; 
+            font-family: 'Tajawal'; 
+            font-size: 13px; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            gap: 6px; 
+            box-shadow: var(--shadow-md); 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.3px;
+        }
+        .btn-action::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .btn-action:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        .btn-action:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--shadow-xl);
+        }
+        .btn-action:active {
+            transform: translateY(-2px) scale(0.98);
+        }
+        .btn-close { 
+            background: linear-gradient(135deg, var(--section-primary) 0%, var(--section-primary-light) 100%);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        .btn-close:hover {
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+        .btn-print { 
+            background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+        }
+        .btn-print:hover {
+            box-shadow: 0 6px 20px rgba(217, 119, 6, 0.4);
+        }
+        .btn-excel { 
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+        .btn-excel:hover {
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+        }
 
         .admin-btn {
             grid-column: span 3; margin-top: 5px; padding: 12px; font-size: 14px; border: 1px solid rgba(0,0,0,0.1);
@@ -125,10 +443,41 @@
         .btn-admin-gray { background: #e2e8f0; color: #94a3b8; cursor: default; }
         @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
 
-        .status-header { display: flex; gap: 10px; margin-bottom: 20px; }
+        .status-header { 
+            display: flex; 
+            gap: 12px; 
+            margin-bottom: 24px; 
+        }
         .status-card {
-            flex: 1; background: white; padding: 10px; border-radius: 12px; text-align: center;
-            box-shadow: var(--shadow-soft); border: 1px solid #e2e8f0; transition: background-color 0.3s, color 0.3s;
+            flex: 1; 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: var(--border-radius-lg); 
+            text-align: center;
+            box-shadow: var(--shadow-md); 
+            border: 1px solid var(--border-color); 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .status-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .status-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--section-primary-light);
+        }
+        .status-card:hover::after {
+            opacity: 1;
         }
         .card-yellow { background-color: #fef9c3; border-color: #facc15; }
         .card-red { background-color: #fee2e2; border-color: #ef4444; }
@@ -137,22 +486,133 @@
         .status-card h3 { margin: 0; font-size: 11px; color: #64748b; }
         .status-detail { font-size: 10px; color: #94a3b8; margin-top: 4px; font-family: monospace; }
 
-        .form-box { background: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: var(--shadow-soft); }
-        .form-header { font-size: 16px; color: var(--header-bg); border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 15px; font-weight: 700; }
+        .form-box { 
+            background: var(--card-bg); 
+            padding: 28px; 
+            border-radius: var(--border-radius-xl); 
+            margin-bottom: 28px; 
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            border-top: 3px solid var(--section-primary);
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+        .form-box:hover {
+            box-shadow: var(--shadow-2xl);
+            border-top-color: var(--section-primary-light);
+            transform: translateY(-3px);
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+        .form-header { 
+            font-size: 19px; 
+            color: var(--section-primary); 
+            border-bottom: 2px solid var(--border-color-light); 
+            padding-bottom: 16px; 
+            margin-bottom: 24px; 
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.3px;
+        }
+        .form-header::before {
+            content: '📝';
+            font-size: 22px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
         
         .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         .full-width { grid-column: span 3; }
 
-        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 12px; color: #475569; }
-        input, select {
-            width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;
-            font-size: 14px; background: #f8fafc; box-sizing: border-box; font-family: 'Tajawal';
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 700; 
+            font-size: 13px; 
+            color: var(--text-secondary);
+            letter-spacing: -0.2px;
         }
-        input:focus, select:focus { border-color: var(--header-bg); background: white; outline: none; }
+        input, select {
+            width: 100%; 
+            padding: 14px 16px; 
+            border: 2px solid var(--border-color); 
+            border-radius: var(--border-radius-md);
+            font-size: 14px; 
+            background: var(--card-bg); 
+            box-sizing: border-box; 
+            font-family: 'Tajawal';
+            color: var(--text-primary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            -webkit-font-smoothing: antialiased;
+        }
+        input:hover, select:hover {
+            border-color: var(--section-primary-light);
+            background: var(--card-hover);
+        }
+        input:focus, select:focus { 
+            border-color: var(--section-primary); 
+            background: white; 
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1), var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+        input.error, select.error {
+            border-color: var(--danger-color) !important;
+            background: #fef2f2 !important;
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .error-message {
+            color: var(--danger-color);
+            font-size: 12px;
+            margin-top: 4px;
+            display: block;
+            font-weight: 600;
+        }
+        label.required::after {
+            content: ' *';
+            color: var(--danger-color);
+            font-weight: 800;
+        }
         .readonly-field { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
 
-        .finance-group { background: #fffaf0; padding: 15px; border-radius: 12px; border: 1px dashed #f39c12; margin-bottom: 15px; }
-        .finance-label { color: #d35400; margin-bottom: 10px; font-size: 14px; text-align: center; font-weight: bold; }
+        .finance-group { 
+            background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%);
+            padding: 24px; 
+            border-radius: var(--border-radius-lg); 
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-left: 4px solid var(--section-warning);
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(245, 158, 11, 0.1);
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+        .finance-group:hover {
+            box-shadow: var(--shadow-xl), 0 0 0 1px rgba(245, 158, 11, 0.2);
+            transform: translateX(-4px) translateY(-2px);
+            border-left-width: 5px;
+        }
+        .finance-label { 
+            color: #d97706; 
+            margin-bottom: 12px; 
+            font-size: 16px; 
+            text-align: center; 
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .finance-label::before {
+            content: '💰';
+            font-size: 18px;
+        }
         
         .mixed-section { display: none; background: #f0fdf4; border: 1px solid #86efac; padding: 10px; border-radius: 8px; margin-top: 10px; }
         .bank-section { display: none; background: #eff6ff; border: 1px solid #bfdbfe; padding: 10px; border-radius: 8px; margin-top: 10px; }
@@ -163,11 +623,49 @@
         .booking-icon { background-color: var(--booking-blue); color: white; border-radius: 3px; padding: 0 4px; font-weight: bold; font-size: 10px; font-family: sans-serif; }
         
         .btn-whatsapp {
-            background: #25D366; color: white; border: none; padding: 14px; border-radius: 10px;
-            font-size: 15px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 20px;
-            display: flex; justify-content: center; align-items: center; gap: 8px; transition: background 0.3s;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white; 
+            border: none; 
+            padding: 16px; 
+            border-radius: 12px;
+            font-size: 16px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            width: 100%; 
+            margin-top: 24px;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 8px; 
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+            position: relative;
+            overflow: hidden;
         }
-        .btn-status-mode { background: var(--status-btn-color) !important; }
+        .btn-whatsapp::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-whatsapp:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+        }
+        .btn-whatsapp:hover::before {
+            left: 100%;
+        }
+        .btn-whatsapp:active {
+            transform: translateY(0);
+        }
+        .btn-status-mode { 
+            background: linear-gradient(135deg, var(--status-btn-color) 0%, #2563eb 100%) !important;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+        }
 
         #checkoutAlert {
             display: none; background-color: var(--alert-bg); color: var(--alert-text);
@@ -185,33 +683,301 @@
 
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
 
-        .history-box { background: white; padding: 10px; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-soft); }
-        .history-header {
-            display: flex; flex-direction: column; gap: 10px;
-            border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 8px;
+        /* Multi-Step Form Styles */
+        .form-step {
+            display: none;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
         }
-        .history-title { font-size: 14px; color: #64748b; font-weight: bold; }
-        .del-buttons { display: flex; gap: 5px; flex-wrap: wrap; }
+        .form-step.active {
+            display: block;
+            opacity: 1;
+            transform: translateX(0);
+            animation: slideInStep 0.5s ease-out;
+        }
+        @keyframes slideInStep {
+            0% {
+                opacity: 0;
+                transform: translateX(30px) scale(0.98);
+            }
+            50% {
+                opacity: 0.7;
+                transform: translateX(10px) scale(0.99);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+        .form-step.exiting {
+            animation: slideOutStep 0.3s ease-in;
+        }
+        @keyframes slideOutStep {
+            0% {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-30px) scale(0.98);
+            }
+        }
+        
+        /* Step Progress Indicator */
+        .step-progress {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 250, 252, 0.9) 100%);
+            border-radius: var(--border-radius-lg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color-light);
+            box-shadow: var(--shadow-sm);
+        }
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border-color);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border: 2px solid transparent;
+        }
+        .step-dot.active {
+            background: linear-gradient(135deg, var(--section-primary) 0%, var(--section-primary-light) 100%);
+            width: 32px;
+            height: 12px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            border-color: var(--section-primary-light);
+        }
+        .step-dot.completed {
+            background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+            border-color: var(--success-color);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+        .step-dot.completed::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+        }
+        
+        .step-navigation {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+        }
+        .btn-step {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-next {
+            background: linear-gradient(135deg, var(--section-primary) 0%, var(--section-primary-light) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-next::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .btn-next:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        .btn-next:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+        .btn-back {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-back::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .btn-back:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        .btn-back:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(100, 116, 139, 0.4);
+        }
+        .btn-back:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .hotel-status-section {
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-left: 4px solid var(--section-success);
+            border-radius: var(--border-radius-lg);
+            padding: 24px !important;
+            margin-top: 0 !important;
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(16, 185, 129, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+        .hotel-status-section:hover {
+            box-shadow: var(--shadow-xl), 0 0 0 1px rgba(16, 185, 129, 0.2);
+            transform: translateX(4px) translateY(-2px);
+            border-left-width: 5px;
+        }
+        .hotel-status-label {
+            background: linear-gradient(135deg, #10b981, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+        }
+
+        .history-box { 
+            background: var(--card-bg); 
+            padding: 24px; 
+            border-radius: var(--border-radius-xl); 
+            overflow: hidden; 
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            border-top: 3px solid var(--section-secondary);
+            margin-top: 28px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+        .history-box:hover {
+            box-shadow: var(--shadow-2xl);
+            border-top-color: #a855f7;
+            transform: translateY(-4px);
+            border-color: rgba(124, 58, 237, 0.2);
+        }
+        .history-header {
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px;
+            border-bottom: 2px solid #e2e8f0; 
+            padding-bottom: 15px; 
+            margin-bottom: 12px;
+        }
+        .history-title { 
+            font-size: 20px; 
+            color: var(--section-secondary); 
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.3px;
+        }
+        .history-title::before {
+            content: '📋';
+            font-size: 24px;
+        }
+        .del-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
         .btn-mini-del {
-            border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer;
-            font-size: 10px; font-weight: bold; color: white; font-family: 'Tajawal'; flex: 1;
+            border: none; padding: 10px 14px; border-radius: var(--border-radius-sm); cursor: pointer;
+            font-size: 12px; font-weight: 700; color: white; font-family: 'Tajawal'; flex: 1;
+            transition: all 0.3s ease;
+        }
+        .btn-mini-del:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         .btn-del-handed { background-color: #64748b; }
         .btn-del-expired { background-color: #ef4444; }
 
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; } 
-        th { text-align: center; font-size: 10px; color: #64748b; padding: 8px 2px; border-bottom: 2px solid #f1f5f9; background: #f8fafc; }
-        td { padding: 8px 2px; border-bottom: 1px solid #f1f5f9; font-size: 11px; text-align: center; vertical-align: middle; word-wrap: break-word;}
+        table { 
+            width: 100%; 
+            border-collapse: separate; 
+            border-spacing: 0;
+            table-layout: fixed;
+            margin-top: 12px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        } 
+        th { 
+            text-align: center; 
+            font-size: 14px; 
+            color: var(--text-secondary); 
+            padding: 16px 10px; 
+            border-bottom: 2px solid var(--border-color); 
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+        td { 
+            padding: 16px 10px; 
+            border-bottom: 1px solid var(--border-color-light); 
+            font-size: 15px; 
+            text-align: center; 
+            vertical-align: middle; 
+            word-wrap: break-word;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-primary);
+        }
+        tr:hover td {
+            background-color: rgba(37, 99, 235, 0.04);
+            transform: scale(1.01);
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
         
         .confirmed-transfer.pending-transfer { color: #059669; cursor: pointer; text-decoration: underline; font-weight: bold; }
         .confirmed-transfer.pending-transfer:hover { text-decoration: none; background-color: #ecfdf5; border-radius: 4px; }
 
-        .col-room { width: 15%; font-weight: bold; }
-        .col-amt { width: 15%; font-weight: bold; color: var(--header-bg); }
-        .col-pay { width: 25%; font-size: 10px; }
-        .col-date { width: 20%; font-size: 9px; color: #64748b; }
-        .col-stat { width: 10%; font-weight: bold; font-size: 10px; }
-        .col-act { width: 15%; }
+        .col-room { width: 12%; font-weight: bold; font-size: 15px !important; }
+        .col-amt { width: 12%; font-weight: bold; color: var(--header-bg); font-size: 15px !important; }
+        .col-pay { width: 20%; font-size: 14px !important; }
+        .col-date { width: 18%; font-size: 15px !important; color: #64748b; }
+        .col-time { width: 12%; font-size: 14px !important; color: #94a3b8; }
+        .col-stat { width: 10%; font-weight: bold; font-size: 14px !important; }
+        .col-act { width: 16%; font-size: 15px !important; }
 
         .status-new { color: var(--danger-color); }
         .status-pending { color: var(--warning-color); }
@@ -223,20 +989,694 @@
         tr.handed-over { background-color: #f8fafc; opacity: 0.6; }
         tr.pending-approval { background-color: #fffbeb; }
         
-        .btn-out { background: var(--danger-color); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; }
+        .btn-out { 
+            background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+            color: white; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: var(--border-radius-sm); 
+            cursor: pointer; 
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+            letter-spacing: 0.2px;
+        }
+        .btn-out:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        .btn-out:active {
+            transform: translateY(0) scale(1);
+        }
+        #btn-more-log {
+            margin-top: 16px !important;
+            width: 100% !important;
+            padding: 14px !important;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 12px !important;
+            font-weight: 800 !important;
+            font-size: 14px !important;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        #btn-more-log:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Print Date Range Modal */
+        .print-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 10001;
+            justify-content: center;
+            align-items: center;
+        }
+        .print-modal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        .print-modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .print-modal-header {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--header-bg);
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+        .print-modal-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .print-modal-body label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+        .print-modal-body input[type="date"],
+        .print-modal-body input[type="time"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Tajawal';
+        }
+        .print-modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .btn-print-confirm {
+            background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-print-cancel {
+            background: #e2e8f0;
+            color: #475569;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        /* Print Report Container */
+        #print-report-container {
+            display: none;
+        }
+        #print-report-container.print-active {
+            display: block;
+        }
+        .print-report-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #000;
+        }
+        .print-report-title {
+            font-size: 20pt;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .print-report-date-range {
+            font-size: 12pt;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .print-report-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+        .print-summary-item {
+            text-align: right;
+        }
+        .print-summary-label {
+            font-size: 10pt;
+            color: #666;
+            margin-bottom: 3px;
+        }
+        .print-summary-value {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #000;
+        }
 
         @media print {
             body * { visibility: hidden; }
-            .history-box, .history-box * { visibility: visible; }
-            .history-box { position: absolute; left: 0; top: 0; width: 100%; padding: 0; background: white; box-shadow: none; }
-            .fixed-footer { position: relative; visibility: visible; border: none; background: none; margin-top: 20px; width: 100%; text-align: center; }
-            .fixed-footer-text { background: none; font-size: 12pt; color: #000; }
-            .history-header, #checkoutAlert, #reportAlert, .admin-btn, .del-buttons, #saveBtn, .action-buttons { display: none !important; }
-            tr.handed-over, button { display: none !important; }
-            table { border: 1px solid #000; width: 100%; direction: rtl; border-collapse: collapse; }
-            th, td { border: 1px solid #000; padding: 5px; color: #000; text-align: center; font-size: 10pt; }
-            th { background: #eee !important; -webkit-print-color-adjust: exact; }
-            .history-box::before { content: "تقرير إيراد الورديـة"; display: block; text-align: center; font-size: 18pt; font-weight: bold; margin-bottom: 15px; }
+            #print-report-container.print-active,
+            #print-report-container.print-active * { 
+                visibility: visible; 
+            }
+            #print-report-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 20px;
+                background: white;
+            }
+            .print-report-header {
+                margin-bottom: 20px;
+                page-break-after: avoid;
+            }
+            .print-report-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 15px;
+            }
+            .print-report-table th,
+            .print-report-table td {
+                border: 1px solid #000;
+                padding: 8px;
+                text-align: center;
+                font-size: 10pt;
+            }
+            .print-report-table th {
+                background: #f0f0f0 !important;
+                font-weight: bold;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .print-report-table tr {
+                page-break-inside: avoid;
+            }
+            .print-report-summary {
+                page-break-after: avoid;
+            }
+            .no-print { display: none !important; }
+        }
+
+        /* ============================================
+           📱 MOBILE FIRST - Responsive Design
+           ============================================ */
+        
+        /* Base Mobile Styles (Default - up to 480px) */
+        /* Note: body styles are defined above, we only override padding here */
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0;
+        }
+        
+        .main-header {
+            padding: 20px 16px;
+            margin-bottom: 16px;
+            border-radius: var(--border-radius-lg);
+        }
+        
+        .header-content h1 {
+            font-size: 18px;
+        }
+        
+        .finance-section {
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .finance-card {
+            padding: 16px;
+        }
+        
+        .finance-val {
+            font-size: 20px;
+        }
+        
+        .action-buttons {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .btn-action {
+            padding: 16px 20px;
+            font-size: 13px;
+            min-height: 56px; /* Touch target size */
+        }
+        
+        .status-cards {
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .status-card {
+            padding: 16px;
+        }
+        
+        .form-box {
+            padding: 20px 16px;
+            margin-bottom: 16px;
+            border-radius: var(--border-radius-lg);
+        }
+        
+        .form-header {
+            font-size: 17px;
+            margin-bottom: 16px;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .full-width {
+            grid-column: span 1;
+        }
+        
+        input, select {
+            padding: 16px;
+            font-size: 16px; /* Prevents zoom on iOS */
+            min-height: 48px; /* Touch target */
+        }
+        
+        label {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .step-progress {
+            padding: 12px;
+            margin-bottom: 16px;
+            gap: 8px;
+        }
+        
+        .step-dot {
+            width: 10px;
+            height: 10px;
+        }
+        
+        .step-dot.active {
+            width: 28px;
+            height: 10px;
+        }
+        
+        .step-navigation {
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-step {
+            padding: 16px;
+            font-size: 15px;
+            min-height: 52px;
+        }
+        
+        .finance-group,
+        .hotel-status-section {
+            padding: 16px !important;
+            margin-bottom: 16px;
+        }
+        
+        .history-box {
+            padding: 16px;
+            margin-top: 16px;
+        }
+        
+        /* Table Wrapper for Mobile Scroll */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: var(--section-primary-light) var(--border-color-light);
+            margin: 0 -12px;
+            padding: 0 12px;
+        }
+        
+        .table-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .table-wrapper::-webkit-scrollbar-track {
+            background: var(--border-color-light);
+            border-radius: 4px;
+        }
+        
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: var(--section-primary-light);
+            border-radius: 4px;
+        }
+        
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: var(--section-primary);
+        }
+        
+        table {
+            font-size: 13px;
+            width: 100%;
+            min-width: 600px; /* Minimum width for table */
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        th, td {
+            padding: 12px 8px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .col-room { min-width: 60px; }
+        .col-amt { min-width: 70px; }
+        .col-pay { min-width: 100px; }
+        .col-date { min-width: 90px; }
+        .col-time { min-width: 70px; }
+        .col-stat { min-width: 60px; }
+        .col-act { min-width: 80px; }
+        
+        .btn-out {
+            padding: 10px 14px;
+            font-size: 11px;
+            min-height: 40px;
+        }
+        
+        .modal-overlay {
+            padding: 16px;
+        }
+        
+        .modal-content {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 20px 16px;
+            border-radius: var(--border-radius-lg);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+        
+        .print-modal-body {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .glass-toast {
+            padding: 12px 16px;
+            font-size: 13px;
+            max-width: 90%;
+        }
+        
+        #toastText {
+            font-size: 13px;
+        }
+        
+        /* Small Mobile (320px - 375px) */
+        @media screen and (max-width: 375px) {
+            body {
+                padding: 8px;
+                padding-bottom: 60px;
+                font-size: 13px;
+            }
+            
+            .main-header {
+                padding: 16px 12px;
+            }
+            
+            .header-content h1 {
+                font-size: 16px;
+            }
+            
+            .form-box {
+                padding: 16px 12px;
+            }
+            
+            .btn-action {
+                padding: 14px 16px;
+                font-size: 12px;
+            }
+            
+            input, select {
+                padding: 14px;
+                font-size: 16px;
+            }
+        }
+        
+        /* Mobile Landscape (481px - 767px) */
+        @media screen and (min-width: 481px) and (max-width: 767px) {
+            .finance-section {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .status-cards {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .status-card {
+                flex: 1 1 calc(50% - 6px);
+            }
+            
+            table {
+                display: table;
+            }
+        }
+        
+        /* Tablet Portrait (768px - 1023px) */
+        @media screen and (min-width: 768px) and (max-width: 1023px) {
+            body {
+                padding: 20px;
+                padding-bottom: 60px;
+            }
+            
+            .container {
+                max-width: 720px;
+            }
+            
+            .finance-section {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .status-cards {
+                flex-direction: row;
+            }
+            
+            .status-card {
+                flex: 1;
+            }
+            
+            .modal-content {
+                max-width: 600px;
+                padding: 28px 24px;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 14px 10px;
+                font-size: 14px;
+            }
+        }
+        
+        /* Tablet Landscape / Small Desktop (1024px - 1279px) */
+        @media screen and (min-width: 1024px) and (max-width: 1279px) {
+            body {
+                padding: 24px;
+                padding-bottom: 60px;
+            }
+            
+            .container {
+                max-width: 960px;
+            }
+            
+            .finance-section {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            
+            .status-cards {
+                flex-direction: row;
+            }
+            
+            .modal-content {
+                max-width: 700px;
+            }
+        }
+        
+        /* Desktop (1280px and above) */
+        @media screen and (min-width: 1280px) {
+            body {
+                padding: 28px;
+                padding-bottom: 60px;
+            }
+            
+            .container {
+                max-width: 1200px;
+            }
+            
+            .finance-section {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            
+            .status-cards {
+                flex-direction: row;
+            }
+            
+            .modal-content {
+                max-width: 800px;
+            }
+            
+            table {
+                font-size: 15px;
+            }
+            
+            th, td {
+                padding: 16px 10px;
+                font-size: 15px;
+            }
+        }
+        
+        /* Large Desktop (1440px and above) */
+        @media screen and (min-width: 1440px) {
+            .container {
+                max-width: 1400px;
+            }
+        }
+        
+        /* Touch Device Optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            /* Touch devices */
+            .btn-action,
+            .btn-step,
+            .btn-out,
+            input[type="button"],
+            input[type="submit"],
+            button {
+                min-height: 48px;
+                -webkit-tap-highlight-color: rgba(37, 99, 235, 0.2);
+            }
+            
+            .btn-action:active,
+            .btn-step:active,
+            .btn-out:active {
+                transform: scale(0.98);
+            }
+            
+            input, select, textarea {
+                -webkit-tap-highlight-color: rgba(37, 99, 235, 0.1);
+            }
+            
+            /* Remove hover effects on touch devices */
+            .finance-card:hover,
+            .status-card:hover,
+            .form-box:hover,
+            .history-box:hover {
+                transform: none;
+            }
+        }
+        
+        /* High DPI Displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            body {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+        }
+        
+        /* Landscape Orientation Adjustments */
+        @media screen and (orientation: landscape) and (max-height: 500px) {
+            .main-header {
+                padding: 12px 16px;
+                margin-bottom: 12px;
+            }
+            
+            .header-content h1 {
+                font-size: 16px;
+            }
+            
+            .form-box {
+                padding: 16px;
+            }
+            
+            .step-progress {
+                padding: 8px;
+                margin-bottom: 12px;
+            }
         }
     </style>
 </head>
@@ -284,7 +1724,7 @@
 
     <div class="action-buttons">
         <button class="btn-action btn-close" onclick="requestHandover()">✋ طلب توريد (للموظف)</button>
-        <button class="btn-action btn-print" onclick="window.print()">🖨️ طباعة تقرير الإيراد</button>
+        <button class="btn-action btn-print" onclick="openPrintModal()">🖨️ طباعة تقرير الإيراد</button>
         <button class="btn-action btn-excel" onclick="exportToExcel()">📊 تصدير كل العمليات</button>
         <button id="adminBtn" class="btn-action admin-btn btn-admin-gray" onclick="approveHandover()">🔑 لا يوجد مبالغ للتوريد</button>
     </div>
@@ -308,7 +1748,17 @@
 
     <div class="form-box">
         <div class="form-header">تسجيل حجز جديد</div>
+        
+        <!-- Step Progress Indicator -->
+        <div class="step-progress">
+            <div class="step-dot active" data-step="1"></div>
+            <div class="step-dot" data-step="2"></div>
+            <div class="step-dot" data-step="3"></div>
+        </div>
+        
         <form id="checkinForm">
+            <!-- Step 1: تسجيل حجز جديد -->
+            <div class="form-step active" id="step1">
             <div class="form-grid">
                 <div class="full-width">
                     <label>مصدر الحجز</label>
@@ -317,55 +1767,61 @@
                         <option value="بوكينج">بوكينج (Booking.com)</option>
                     </select>
                 </div>
-                <div class="full-width">
-                    <label>التاريخ</label>
-                    <select id="checkInDate" onchange="calculateCheckout()"></select>
+                <div>
+                    <label class="required">التاريخ</label>
+                    <select id="checkInDate" onchange="calculateCheckout(); removeError(this);" required></select>
                 </div>
                 <div>
-                    <label>النوع</label>
-                    <select id="rentType" onchange="toggleRentType()">
+                    <label class="required">الليالي</label>
+                    <input type="number" id="nightsCount" min="1" placeholder="..." oninput="calculateDailyTotal(); removeError(this);" required>
+                </div>
+                <div>
+                    <label>الخروج</label>
+                    <input type="text" id="checkOutDate" class="readonly-field" readonly>
+                </div>
+                <div>
+                    <label class="required">النوع</label>
+                    <select id="rentType" onchange="toggleRentType(); removeError(this);" required>
                         <option value="يومي">يومي</option>
                         <option value="شهري">شهري</option>
                     </select>
                 </div>
                 <div>
-                    <label>الليالي</label>
-                    <input type="number" id="nightsCount" min="1" placeholder="..." oninput="calculateDailyTotal()">
-                </div>
-                <div class="full-width">
-                    <label>الخروج</label>
-                    <input type="text" id="checkOutDate" class="readonly-field" readonly>
+                    <label class="required">رقم الغرفة</label>
+                    <input type="number" id="roomNumber" placeholder="101" oninput="removeError(this);" required>
                 </div>
                 <div>
-                    <label>رقم الغرفة (اتركه فارغاً لإرسال تقرير فقط)</label>
-                    <input type="number" id="roomNumber" placeholder="101" oninput="updateButtonState()">
-                </div>
-                <div>
-                    <label>نوع الغرفة</label>
-                    <select id="roomTypeInput">
+                    <label class="required">نوع الغرفة</label>
+                    <select id="roomTypeInput" required>
                         <option value="single">غرفة مفرد</option> <option value="1bhk">غرفة وصالة</option>
                         <option value="2bhk">غرفتين</option>
                     </select>
                 </div>
             </div>
 
-            <hr style="border:0; border-top:1px dashed #e2e8f0; margin: 15px 0;">
+            <!-- Navigation Buttons for Step 1 -->
+            <div class="step-navigation">
+                <button type="button" class="btn-step btn-back" disabled>⬅️ رجوع</button>
+                <button type="button" class="btn-step btn-next" onclick="validateAndGoToStep(1, 2, event)">التالي ➡️</button>
+            </div>
+            </div>
 
+            <!-- Step 2: تفاصيل الإيجار -->
+            <div class="form-step" id="step2">
             <div class="finance-group">
                 <div class="finance-label" id="financeLabel">تفاصيل الإيجار</div>
                 <div class="form-grid">
                     <div id="dailyRateDiv">
-                        <label style="color:var(--booking-blue)">إيجار اليوم الواحد</label>
-                        <input type="number" id="dailyRate" placeholder="سعر الليلة" oninput="calculateDailyTotal()">
-                    </div>
-
-                    <div class="full-width">
-                        <label>الإجمالي (تلقائي)</label>
-                        <input type="number" id="totalRentAmount" placeholder="يتم الحساب تلقائياً" oninput="calculateRemaining()">
+                        <label class="required" style="color:var(--booking-blue)">إيجار اليوم الواحد</label>
+                        <input type="number" id="dailyRate" placeholder="سعر الليلة" oninput="calculateDailyTotal(); removeError(this);" required>
                     </div>
                     <div>
-                        <label>المدفوع الآن</label>
-                        <input type="number" id="paidAmount" placeholder="الدفعة" oninput="calculateRemaining()">
+                        <label class="required">الإجمالي (تلقائي)</label>
+                        <input type="number" id="totalRentAmount" placeholder="يتم الحساب تلقائياً" oninput="calculateRemaining(); removeError(this);" required>
+                    </div>
+                    <div>
+                        <label class="required">المدفوع الآن</label>
+                        <input type="number" id="paidAmount" placeholder="الدفعة" oninput="calculateRemaining(); removeError(this);" required>
                     </div>
                     <div>
                         <label>المتبقي (مديونية)</label>
@@ -374,10 +1830,10 @@
                 </div>
             </div>
 
-            <div class="form-grid" style="margin-top: 15px;">
+            <div class="form-grid" style="margin-top: 20px;">
                 <div class="full-width">
-                    <label>طريقة الدفع</label>
-                    <select id="paymentMethod" onchange="togglePaymentSections()">
+                    <label class="required">طريقة الدفع</label>
+                    <select id="paymentMethod" onchange="togglePaymentSections(); removeError(this);" required>
                         <option value="نقدى" selected>نقدى</option>
                         <option value="شبكة">شبكة</option>
                         <option value="مختلط">مختلط (نقدى + شبكة)</option>
@@ -421,14 +1877,25 @@
                         
                         <span id="requiredWarning" style="color: #dc2626; font-size: 10px; display: block; margin-top: 8px; text-align: center;">* يجب إرفاق إثبات واحد على الأقل</span>
                     </div>
+                    </div>
                 </div>
 
-                <div class="full-width" style="border-top:1px solid #eee; margin-top:10px; padding-top:10px;">
-                    <label style="text-align:center; color:#475569; margin-bottom:10px;">تحديث حالة الفندق</label>
+            <!-- Navigation Buttons for Step 2 -->
+            <div class="step-navigation">
+                <button type="button" class="btn-step btn-back" onclick="goToStep(1)">⬅️ رجوع</button>
+                <button type="button" class="btn-step btn-next" onclick="validateAndGoToStep(2, 3, event)">التالي ➡️</button>
+            </div>
+            </div>
+
+            <!-- Step 3: تحديث حالة الفندق -->
+            <div class="form-step" id="step3">
+            <div class="hotel-status-section">
+                <label class="hotel-status-label" style="text-align:center; color:#10b981; margin-bottom:15px; font-size:16px; font-weight:800; display:block;">🏨 تحديث حالة الفندق</label>
                     <div class="form-grid">
                         <div>
                             <label style="color:var(--success-color)">إجمالي الشاغر (غرفة مفرد)</label>
-                            <input type="number" id="vac3Input" class="vacancy-input" onfocus="this.value=''" oninput="updateTopCounters()" placeholder="العدد"> </div>
+                        <input type="number" id="vac3Input" class="vacancy-input" onfocus="this.value=''" oninput="updateTopCounters()" placeholder="العدد"> 
+                    </div>
                         <div>
                             <label style="color:var(--success-color)">إجمالي الشاغر (غرفة وصالة)</label>
                             <input type="number" id="vac1Input" class="vacancy-input" onfocus="this.value=''" oninput="updateTopCounters()" placeholder="العدد">
@@ -439,7 +1906,8 @@
                         </div>
                         <div>
                             <label class="booking-label"><span class="booking-icon">B.</span> حجوزات مؤكدة (غرفة مفرد)</label>
-                            <input type="number" id="book3Input" class="booking-input" onfocus="this.value=''" oninput="updateTopCounters()" placeholder="Booking.com"> </div>
+                        <input type="number" id="book3Input" class="booking-input" onfocus="this.value=''" oninput="updateTopCounters()" placeholder="Booking.com"> 
+                    </div>
                         <div>
                             <label class="booking-label"><span class="booking-icon">B.</span> حجوزات مؤكدة (غرفة وصالة)</label>
                             <input type="number" id="book1Input" class="booking-input" onfocus="this.value=''" oninput="updateTopCounters()" placeholder="Booking.com">
@@ -447,16 +1915,74 @@
                         <div>
                             <label class="booking-label"><span class="booking-icon">B.</span> حجوزات مؤكدة (غرفتين)</label>
                             <input type="number" id="book2Input" class="booking-input" onfocus="this.value=''" oninput="updateTopCounters()" placeholder="Booking.com">
-                        </div>
                     </div>
                 </div>
             </div>
 
-            <button type="submit" class="btn-whatsapp btn-status-mode" id="saveBtn">إرسال تقرير الإشغال 📝</button>
+            <!-- Navigation Buttons for Step 3 -->
+            <div class="step-navigation">
+                <button type="button" class="btn-step btn-back" onclick="goToStep(2)">⬅️ رجوع</button>
+                <button type="submit" class="btn-step btn-next" id="saveBtn">حفظ وإرسال 📱</button>
+            </div>
+            </div>
         </form>
     </div>
 
     <div id="checkoutAlert"></div>
+
+    <!-- Print Date Range Modal -->
+    <div id="printModal" class="print-modal">
+        <div class="print-modal-content">
+            <div class="print-modal-header">📅 تحديد فترة التقرير</div>
+            <div class="print-modal-body">
+                <div>
+                    <label>تاريخ البداية</label>
+                    <input type="date" id="printStartDate" required>
+                </div>
+                <div>
+                    <label>وقت البداية</label>
+                    <input type="time" id="printStartTime" value="00:00" required>
+                </div>
+                <div>
+                    <label>تاريخ النهاية</label>
+                    <input type="date" id="printEndDate" required>
+                </div>
+                <div>
+                    <label>وقت النهاية</label>
+                    <input type="time" id="printEndTime" value="23:59" required>
+                </div>
+            </div>
+            <div class="print-modal-footer">
+                <button class="btn-print-cancel" onclick="closePrintModal()">إلغاء</button>
+                <button class="btn-print-confirm" onclick="generatePrintReport()">🖨️ طباعة</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Report Container (Hidden until print) -->
+    <div id="print-report-container">
+        <div class="print-report-header">
+            <div class="print-report-title">تقرير إيراد الوردية</div>
+            <div class="print-report-date-range" id="printDateRange"></div>
+            <div style="font-size: 10pt; color: #666; margin-top: 5px;" id="printGeneratedTime"></div>
+        </div>
+        <div class="print-report-summary" id="printSummary"></div>
+        <table class="print-report-table" id="printReportTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>الغرفة</th>
+                    <th>النوع</th>
+                    <th>المبلغ</th>
+                    <th>طريقة الدفع</th>
+                    <th>تاريخ الدخول</th>
+                    <th>تاريخ الخروج</th>
+                    <th>وقت الإرسال</th>
+                </tr>
+            </thead>
+            <tbody id="printReportBody"></tbody>
+        </table>
+    </div>
 
     <div class="history-box">
         <div class="history-header">
@@ -466,6 +1992,7 @@
                 <button class="btn-mini-del btn-del-expired" onclick="deleteExpired()">⏳ حذف الحجوزات المنتهي فقط</button>
             </div>
         </div>
+        <div class="table-wrapper">
         <table id="historyTable">
             <thead>
                 <tr>
@@ -473,12 +2000,14 @@
                     <th class="col-amt">المبلغ</th>
                     <th class="col-pay">طريقة الدفع</th>
                     <th class="col-date">التاريخ</th>
+                    <th class="col-time">وقت الإرسال</th>
                     <th class="col-stat">ترحيل</th>
                     <th class="col-act">خروج</th>
                 </tr>
             </thead>
             <tbody></tbody>
         </table>
+        </div>
         <button id="btn-more-log" onclick="loadMoreLog()" style="display:none; margin-top:10px; width:100%; padding:10px; background:#3b82f6; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">
             ⬇️ عرض المزيد
         </button>
@@ -601,6 +2130,29 @@
                 dateDisplay = `${datePart} ${dayName}`;
             }
 
+            // ✅ تنسيق وقت الإرسال/الحفظ
+            let timeDisplay = '--';
+            if (t.actionTime) {
+                try {
+                    const actionTimeObj = new Date(t.actionTime);
+                    if (!isNaN(actionTimeObj)) {
+                        const timeStr = actionTimeObj.toLocaleTimeString('ar-EG', { 
+                            hour: '2-digit', 
+                            minute: '2-digit',
+                            hour12: true 
+                        });
+                        const dateStr = actionTimeObj.toLocaleDateString('ar-EG', {
+                            day: '2-digit',
+                            month: '2-digit'
+                        });
+                        timeDisplay = `${timeStr}<br><span style="font-size:7px; color:#cbd5e1;">${dateStr}</span>`;
+                    }
+                } catch(e) {
+                    // في حالة خطأ، نعرض الوقت الخام
+                    timeDisplay = t.actionTime ? new Date(t.actionTime).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '--';
+                }
+            }
+
             let roomDisplay = `<strong>${t.roomNumber}</strong><br><span style="font-size:9px; color:#94a3b8;">${t.roomTypeName}</span>`;
             let btn = t.status === 'active' ? `<button class="btn-out" onclick="checkoutRoom('${t.firebaseKey}')">خروج</button>` : '✔';
 
@@ -608,8 +2160,9 @@
                 <td>${roomDisplay}</td>
                 <td style="color:${t.isHandedOver === true ? 'inherit' : 'var(--header-bg)'}; font-weight:bold;">${t.amount}</td>
                 <td>${paymentDisplay}</td>
-                <td style="font-size:9px;">${dateDisplay}<br>${t.checkOut}</td>
-                <td style="font-size:10px; font-weight:bold;">${statusText}</td>
+                <td style="font-size:15px;">${dateDisplay}<br>${t.checkOut}</td>
+                <td style="font-size:14px; text-align:center;">${timeDisplay}</td>
+                <td style="font-size:14px; font-weight:bold;">${statusText}</td>
                 <td>${btn}</td>
             `;
             tbody.appendChild(row);
@@ -768,11 +2321,23 @@
 
     window.showGlassToast = function(msg, icon = '✅') {
         const container = document.getElementById('toast-container');
-        document.getElementById('toastText').innerText = msg;
-        document.getElementById('toastIcon').innerText = icon;
-        container.style.opacity = '1';
+        const toastMsg = document.getElementById('toastMsg');
+        const toastText = document.getElementById('toastText');
+        const toastIcon = document.getElementById('toastIcon');
+        
+        // تحديث المحتوى
+        toastText.innerText = msg;
+        toastIcon.innerText = icon;
+        
+        // إضافة class للظهور بتأثير جميل
+        container.classList.add('show');
         container.style.pointerEvents = 'auto';
-        setTimeout(() => { container.style.opacity = '0'; container.style.pointerEvents = 'none'; }, 3000);
+        
+        // إخفاء بعد 2.5 ثانية بتأثير تدريجي
+        setTimeout(() => {
+            container.classList.remove('show');
+            container.style.pointerEvents = 'none';
+        }, 2500);
     }
 
     window.saveVacanciesToCloud = function() {
@@ -913,32 +2478,343 @@
         document.getElementById('checkOutDate').value = d.toLocaleDateString('en-GB');
     }
 
-    window.updateButtonState = function() {
-        const roomNum = document.getElementById('roomNumber').value;
-        const btn = document.getElementById('saveBtn');
-        if (!roomNum) {
-            btn.innerText = "إرسال تقرير الإشغال 📝";
-            btn.classList.add('btn-status-mode');
-            btn.style.backgroundColor = '#3b82f6';
-        } else {
-            btn.innerText = "حفظ وإرسال 📱";
-            btn.classList.remove('btn-status-mode');
-            btn.style.backgroundColor = '#25D366';
+    // ✅ دالة التحقق من صحة الخطوة
+    window.validateStep = function(stepNumber) {
+        let isValid = true;
+        const errors = [];
+        
+        // إزالة رسائل الخطأ السابقة
+        document.querySelectorAll('.error-message').forEach(msg => msg.remove());
+        document.querySelectorAll('.error').forEach(field => {
+            field.classList.remove('error');
+        });
+        
+        if (stepNumber === 1) {
+            // التحقق من الخطوة 1: تسجيل حجز جديد
+            const checkInDate = document.getElementById('checkInDate');
+            const rentType = document.getElementById('rentType');
+            const nightsCount = document.getElementById('nightsCount');
+            const roomNumber = document.getElementById('roomNumber');
+            const roomTypeInput = document.getElementById('roomTypeInput');
+            
+            if (!checkInDate.value) {
+                isValid = false;
+                checkInDate.classList.add('error');
+                showFieldError(checkInDate, 'يرجى اختيار تاريخ الدخول');
+            }
+            
+            if (!rentType.value) {
+                isValid = false;
+                rentType.classList.add('error');
+                showFieldError(rentType, 'يرجى اختيار نوع الإيجار');
+            }
+            
+            if (!nightsCount.value || parseInt(nightsCount.value) < 1) {
+                isValid = false;
+                nightsCount.classList.add('error');
+                showFieldError(nightsCount, 'يرجى إدخال عدد الليالي (1 على الأقل)');
+            }
+            
+            if (!roomNumber.value || parseInt(roomNumber.value) <= 0) {
+                isValid = false;
+                roomNumber.classList.add('error');
+                showFieldError(roomNumber, 'يرجى إدخال رقم الغرفة');
+            }
+            
+            if (!roomTypeInput.value) {
+                isValid = false;
+                roomTypeInput.classList.add('error');
+                showFieldError(roomTypeInput, 'يرجى اختيار نوع الغرفة');
+            }
+        } else if (stepNumber === 2) {
+            // التحقق من الخطوة 2: تفاصيل الإيجار
+            const rentType = document.getElementById('rentType').value;
+            const dailyRate = document.getElementById('dailyRate');
+            const totalRentAmount = document.getElementById('totalRentAmount');
+            const paidAmount = document.getElementById('paidAmount');
+            const paymentMethod = document.getElementById('paymentMethod');
+            
+            if (rentType === 'يومي') {
+                if (!dailyRate.value || parseFloat(dailyRate.value) <= 0) {
+                    isValid = false;
+                    dailyRate.classList.add('error');
+                    showFieldError(dailyRate, 'يرجى إدخال إيجار اليوم الواحد');
+                }
+            }
+            
+            if (!totalRentAmount.value || parseFloat(totalRentAmount.value) <= 0) {
+                isValid = false;
+                totalRentAmount.classList.add('error');
+                showFieldError(totalRentAmount, 'يرجى إدخال الإجمالي');
+            }
+            
+            if (!paidAmount.value || parseFloat(paidAmount.value) <= 0) {
+                isValid = false;
+                paidAmount.classList.add('error');
+                showFieldError(paidAmount, 'يرجى إدخال المبلغ المدفوع');
+            }
+            
+            if (!paymentMethod.value) {
+                isValid = false;
+                paymentMethod.classList.add('error');
+                showFieldError(paymentMethod, 'يرجى اختيار طريقة الدفع');
+            }
         }
+        
+        // لا نعرض رسالة toast عند التحقق - فقط نرجع النتيجة
+        // الرسالة ستظهر فقط عند محاولة الانتقال
+        return isValid;
+    }
+    
+    // ✅ دالة إظهار رسالة خطأ للحقل
+    function showFieldError(field, message) {
+        // إزالة رسالة الخطأ السابقة إن وجدت
+        const existingError = field.parentElement.querySelector('.error-message');
+        if (existingError) existingError.remove();
+        
+        const errorMsg = document.createElement('span');
+        errorMsg.className = 'error-message';
+        errorMsg.textContent = message;
+        field.parentElement.appendChild(errorMsg);
+    }
+    
+    // ✅ دالة إزالة رسالة الخطأ عند التصحيح
+    window.removeError = function(field) {
+        if (field.classList.contains('error')) {
+            field.classList.remove('error');
+            const errorMsg = field.parentElement.querySelector('.error-message');
+            if (errorMsg) errorMsg.remove();
+        }
+    }
+    
+    // ✅ دالة التحقق والانتقال للخطوة التالية مع تأثيرات سلسة
+    window.validateAndGoToStep = function(currentStep, nextStep, event) {
+        // منع النقرات المتعددة
+        const btn = event ? event.target : document.querySelector(`#step${currentStep} ~ .step-navigation .btn-next`);
+        if (btn && btn.disabled) return;
+        if (btn) btn.disabled = true;
+        
+        if (validateStep(currentStep)) {
+            // ✅ الانتقال الناجح - تأثير سلس
+            const currentStepEl = document.getElementById(`step${currentStep}`);
+            if (currentStepEl) {
+                currentStepEl.classList.add('exiting');
+            }
+            
+            // تحديث مؤشر التقدم
+            updateStepProgress(currentStep, true);
+            
+            // الانتقال بعد تأثير الخروج
+            setTimeout(() => {
+                goToStep(nextStep);
+                updateStepProgress(nextStep, false);
+                if (btn) btn.disabled = false;
+            }, 300);
+        } else {
+            // ✅ فشل التحقق - إظهار رسالة خطأ
+            showGlassToast('⚠️ يرجى استكمال جميع الحقول المطلوبة', '⚠️');
+            
+            // Scroll للحقل الأول الذي به خطأ
+            setTimeout(() => {
+                const firstError = document.querySelector('.error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => firstError.focus(), 300);
+                }
+                if (btn) btn.disabled = false;
+            }, 100);
+        }
+    }
+    
+    // ✅ دالة تحديث مؤشر التقدم
+    function updateStepProgress(stepNumber, isCompleted) {
+        const dots = document.querySelectorAll('.step-dot');
+        dots.forEach((dot, index) => {
+            const stepIndex = index + 1;
+            dot.classList.remove('active', 'completed');
+            
+            if (stepIndex < stepNumber) {
+                dot.classList.add('completed');
+            } else if (stepIndex === stepNumber) {
+                dot.classList.add('active');
+                if (isCompleted) {
+                    setTimeout(() => {
+                        dot.classList.add('completed');
+                        dot.classList.remove('active');
+                    }, 200);
+                }
+            }
+        });
+    }
+
+    // ✅ دالة التنقل بين خطوات النموذج مع تأثيرات سلسة
+    window.goToStep = function(stepNumber) {
+        // إخفاء جميع الخطوات
+        const steps = document.querySelectorAll('.form-step');
+        steps.forEach(step => {
+            step.classList.remove('active', 'exiting');
+        });
+        
+        // إظهار الخطوة المطلوبة
+        const targetStep = document.getElementById(`step${stepNumber}`);
+        if (targetStep) {
+            // إضافة class active مع animation
+            setTimeout(() => {
+                targetStep.classList.add('active');
+            }, 50);
+            
+            // تحديث مؤشر التقدم
+            updateStepProgress(stepNumber, false);
+            
+            // تحديث حالة أزرار الرجوع
+            const backButtons = document.querySelectorAll('.btn-back');
+            backButtons.forEach((btn, index) => {
+                const stepIndex = index + 1;
+                if (stepIndex === 1) {
+                    btn.disabled = true;
+                } else {
+                    btn.disabled = false;
+                }
+            });
+            
+            // Scroll smooth للخطوة الجديدة مع تأثير جميل
+            setTimeout(() => {
+                const formBox = targetStep.closest('.form-box');
+                if (formBox) {
+                    formBox.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start',
+                        inline: 'nearest'
+                    });
+                } else {
+                    targetStep.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }
+            }, 200);
+        }
+    }
+
+    // تم إزالة updateButtonState - رقم الغرفة أصبح إجباري دائماً
+
+    // ✅ دالة عرض مستطيل التحميل مع شريط التقدم (3 ثوانٍ) - ترجع Promise
+    window.showSaveProgressLoader = function() {
+        return new Promise((resolve) => {
+            // إزالة أي loader موجود مسبقاً
+            const existing = document.getElementById('save-progress-loader');
+            if (existing) existing.remove();
+            
+            // إنشاء مستطيل التحميل
+            const loader = document.createElement('div');
+            loader.id = 'save-progress-loader';
+            loader.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(10px);
+                border-radius: 16px;
+                padding: 24px 32px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                z-index: 10000;
+                min-width: 280px;
+                text-align: center;
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            loader.innerHTML = `
+                <div style="font-size: 2rem; margin-bottom: 12px;">📱</div>
+                <div style="font-weight: 700; font-size: 1rem; color: var(--text-color); margin-bottom: 16px;">جاري الحفظ والإرسال...</div>
+                <div style="width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
+                    <div id="save-progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981); border-radius: 4px; transition: width 0.3s ease, background 0.3s ease;"></div>
+                </div>
+                <div style="font-size: 0.75rem; color: #64748b;" id="save-progress-text">0%</div>
+            `;
+            
+            document.body.appendChild(loader);
+            
+            // إضافة animation إذا لم تكن موجودة
+            if (!document.getElementById('save-progress-loader-styles')) {
+                const style = document.createElement('style');
+                style.id = 'save-progress-loader-styles';
+                style.textContent = `
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+                        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // تحديث شريط التقدم كل ثانية (3 مراحل)
+            let progress = 0;
+            const progressBar = document.getElementById('save-progress-bar');
+            const progressText = document.getElementById('save-progress-text');
+            
+            const updateProgress = () => {
+                progress += 33.33; // 33.33% كل ثانية (3 ثوانٍ = 100%)
+                
+                if (progress > 100) progress = 100;
+                
+                progressBar.style.width = progress + '%';
+                
+                // تغيير اللون تدريجياً من الأحمر إلى الأخضر
+                if (progress <= 33.33) {
+                    // أحمر إلى برتقالي
+                    progressBar.style.background = `linear-gradient(90deg, #ef4444, #f59e0b)`;
+                } else if (progress <= 66.66) {
+                    // برتقالي إلى أصفر
+                    progressBar.style.background = `linear-gradient(90deg, #f59e0b, #eab308)`;
+                } else {
+                    // أصفر إلى أخضر
+                    progressBar.style.background = `linear-gradient(90deg, #eab308, #10b981)`;
+                }
+                
+                progressText.textContent = Math.round(progress) + '%';
+                
+                if (progress < 100) {
+                    setTimeout(updateProgress, 1000); // تحديث كل ثانية
+                } else {
+                    // إخفاء المستطيل بعد 3 ثوانٍ ثم resolve Promise
+                    setTimeout(() => {
+                        loader.style.animation = 'fadeIn 0.3s ease reverse';
+                        setTimeout(() => {
+                            if (loader.parentNode) {
+                                loader.remove();
+                            }
+                            // ✅ resolve بعد اكتمال الشريط وإخفاء المستطيل
+                            resolve();
+                        }, 300);
+                    }, 500);
+                }
+            };
+            
+            // بدء التحديث بعد 100ms
+            setTimeout(updateProgress, 100);
+        });
     }
 
     document.getElementById('checkinForm').addEventListener('submit', function(e) { 
         e.preventDefault();
-        window.saveVacanciesToCloud();
 
+        // ✅ التحقق من رقم الغرفة (إجباري)
         const roomNum = document.getElementById('roomNumber').value;
-        if (!roomNum) {
-            window.sendStatusWhatsapp();
-            const reportData = { actionTime: new Date().toISOString(), isReport: true };
-            push(transactionsRef, reportData);
-            showGlassToast('تم تحديث الحالة وإرسال التقرير 📝', 'ℹ️');
+        if (!roomNum || parseInt(roomNum) <= 0) {
+            showGlassToast('⚠️ يرجى إدخال رقم الغرفة', '⚠️');
+            const roomNumberField = document.getElementById('roomNumber');
+            roomNumberField.classList.add('error');
+            showFieldError(roomNumberField, 'رقم الغرفة مطلوب');
+            goToStep(1);
+            setTimeout(() => {
+                roomNumberField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                roomNumberField.focus();
+            }, 300);
             return;
         }
+        
+        window.saveVacanciesToCloud();
 
         const checkIn = document.getElementById('checkInDate').value;
         const nights = document.getElementById('nightsCount').value;
@@ -1008,6 +2884,9 @@
             receiptURL: null 
         };
 
+        // ✅ عرض مستطيل التحميل وانتظار اكتمال الشريط قبل تنفيذ باقي الخطوات
+        window.showSaveProgressLoader().then(() => {
+            // تنفيذ باقي الخطوات بعد اكتمال الشريط
         push(transactionsRef, data)
             .catch((error) => {
                 console.error('Failed to save:', error);
@@ -1019,11 +2898,26 @@
 
         sendWhatsapp(data);
         
+            // ✅ إرسال تقرير الإشغال تلقائياً بعد الحفظ
+            setTimeout(() => {
+                window.sendStatusWhatsapp();
+                const reportData = { actionTime: new Date().toISOString(), isReport: true };
+                push(transactionsRef, reportData).catch(console.error);
+            }, 1000);
+            
+            // ✅ إعادة تعيين النموذج والعودة للخطوة الأولى
         this.reset();
         window.setupDateDropdown();
         window.toggleRentType();
         window.togglePaymentSections();
-        window.updateButtonState(); 
+            
+            // العودة للخطوة الأولى بعد الحفظ
+            setTimeout(() => {
+                goToStep(1);
+                // Scroll to top smoothly
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 500);
+        }); 
     });
 
     window.sendWhatsapp = function(data) {
@@ -1032,12 +2926,17 @@
             moneyDetails += `\n*📉 الإجمالي:* ${data.totalContract}\n*⚠️ المتبقي:* ${data.debt}`;
         }
 
-        const v1 = document.getElementById('vac1Input').value;
-        const v2 = document.getElementById('vac2Input').value;
-        const v3 = document.getElementById('vac3Input').value; 
-        const b1 = document.getElementById('book1Input').value;
-        const b2 = document.getElementById('book2Input').value;
-        const b3 = document.getElementById('book3Input').value; 
+        const v1 = document.getElementById('vac1Input').value || '';
+        const v2 = document.getElementById('vac2Input').value || '';
+        const v3 = document.getElementById('vac3Input').value || ''; 
+        const b1 = document.getElementById('book1Input').value || '';
+        const b2 = document.getElementById('book2Input').value || '';
+        const b3 = document.getElementById('book3Input').value || ''; 
+        
+        // ✅ التحقق من إدخال حالة الإشغال
+        const hasVacancyData = (v1 && parseInt(v1) > 0) || (v2 && parseInt(v2) > 0) || (v3 && parseInt(v3) > 0);
+        const hasBookingData = (b1 && parseInt(b1) > 0) || (b2 && parseInt(b2) > 0) || (b3 && parseInt(b3) > 0);
+        const hasStatusData = hasVacancyData || hasBookingData;
         
         const net1 = (parseInt(v1) || 0) - (parseInt(b1) || 0);
         const net2 = (parseInt(v2) || 0) - (parseInt(b2) || 0);
@@ -1056,6 +2955,15 @@
         const timeStr = timeObj.toLocaleString('ar-EG');
 
         const recommendation = window.generateRecommendationText(v1, v2, v3, b1, b2, b3); 
+        
+        // ✅ بناء رسالة حالة الإشغال
+        let statusMessage = '';
+        if (hasStatusData) {
+            statusMessage = `🔢 الشاغر: ${net3} مفرد | ${net1} غرف وصاله  |  ${net2} غرفتين
+محجوز بوكينج : ${b3 || 0} مفرد و ${b1 || 0} غرفه وصاله و ${b2 || 0} غرفتين`;
+        } else {
+            statusMessage = '⚠️ يتم ادخال حاله الاشغال';
+        }
 
         const text = `تقرير إيجار غرفة ${data.roomNumber} - ${data.roomTypeName}
 ----------------------------
@@ -1065,8 +2973,7 @@ ${moneyDetails}
 🌙 المدة: ${data.nights} ليالي
 📤 الخروج: ${checkOutStr}
 💳 الدفع: ${data.paymentMethod}
-🔢 الشاغر: ${net3} مفرد | ${net1} غرف وصاله  |  ${net2} غرفتين
-محجوز بوكينج : ${b3} مفرد و ${b1} غرفه وصاله و ${b2} غرفتين
+${statusMessage}
 ${recommendation}
 ----------------------------
 🕒: ${timeStr}`;
@@ -1076,12 +2983,17 @@ ${recommendation}
     }
 
     window.sendStatusWhatsapp = function() {
-        const v1 = document.getElementById('vac1Input').value || 0;
-        const v2 = document.getElementById('vac2Input').value || 0;
-        const v3 = document.getElementById('vac3Input').value || 0; 
-        const b1 = document.getElementById('book1Input').value || 0;
-        const b2 = document.getElementById('book2Input').value || 0;
-        const b3 = document.getElementById('book3Input').value || 0; 
+        const v1 = document.getElementById('vac1Input').value || '';
+        const v2 = document.getElementById('vac2Input').value || '';
+        const v3 = document.getElementById('vac3Input').value || ''; 
+        const b1 = document.getElementById('book1Input').value || '';
+        const b2 = document.getElementById('book2Input').value || '';
+        const b3 = document.getElementById('book3Input').value || ''; 
+        
+        // ✅ التحقق من إدخال حالة الإشغال
+        const hasVacancyData = (v1 && parseInt(v1) > 0) || (v2 && parseInt(v2) > 0) || (v3 && parseInt(v3) > 0);
+        const hasBookingData = (b1 && parseInt(b1) > 0) || (b2 && parseInt(b2) > 0) || (b3 && parseInt(b3) > 0);
+        const hasStatusData = hasVacancyData || hasBookingData;
         
         const net1 = (parseInt(v1) || 0) - (parseInt(b1) || 0);
         const net2 = (parseInt(v2) || 0) - (parseInt(b2) || 0);
@@ -1094,14 +3006,22 @@ ${recommendation}
         const fullDate = now.toLocaleString('ar-EG');
         
         const recommendation = window.generateRecommendationText(v1, v2, v3, b1, b2, b3); 
+        
+        // ✅ بناء رسالة حالة الإشغال
+        let statusMessage = '';
+        if (hasStatusData) {
+            statusMessage = `🔢 الشاغر: ${net3} مفرد | ${net1} غرف وصاله  |  ${net2} غرفتين
+محجوز بوكينج : ${b3 || 0} مفرد و ${b1 || 0} غرفه وصاله و ${b2 || 0} غرفتين`;
+        } else {
+            statusMessage = '⚠️ يتم ادخال حاله الاشغال';
+        }
 
         const text = `-----------------------------
 تقرير حالة الإشغال الحالي
 الساعه ${nowStr}
 التقرير التالي ${nextStr}
 ----------------------------
-🔢 الشاغر: ${net3} مفرد | ${net1} غرف وصاله  |  ${net2} غرفتين
-محجوز بوكينج : ${b3} مفرد و ${b1} غرفه وصاله و ${b2} غرفتين
+${statusMessage}
 ${recommendation}
 ----------------------------
 🕒: ${fullDate}`;
@@ -1116,6 +3036,189 @@ ${recommendation}
     window.approveHandover = function() { if(!transactions.some(t => t.isHandedOver === 'pending')) return; const pin = prompt("أدخل كود المدير:"); if(pin === 'fahd5') { const updates = {}; transactions.forEach(t => { if(t.isHandedOver === 'pending') updates[`transactions/${t.firebaseKey}/isHandedOver`] = true; }); update(ref(db), updates); showGlassToast('تم الاعتماد', '💰'); } else { alert('خطأ'); } }
     window.checkoutRoom = function(k) { if(confirm('خروج؟')) update(ref(db, `transactions/${k}`), { status: 'completed' }); }
     window.toggleBankStatus = function(k, s) { if(s.includes('لم يؤكد') && confirm('تأكيد؟')) update(ref(db, `transactions/${k}`), { paymentMethod: s.replace('لم يؤكد ⏳', 'تم الاستلام ✅') }); }
+    
+    // ✅ دوال الطباعة مع تحديد التاريخ والوقت
+    window.openPrintModal = function() {
+        const modal = document.getElementById('printModal');
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        // تعيين القيم الافتراضية (من أمس إلى اليوم)
+        document.getElementById('printStartDate').value = yesterday.toISOString().split('T')[0];
+        document.getElementById('printStartTime').value = '00:00';
+        document.getElementById('printEndDate').value = today.toISOString().split('T')[0];
+        document.getElementById('printEndTime').value = '23:59';
+        
+        modal.classList.add('show');
+    }
+    
+    window.closePrintModal = function() {
+        const modal = document.getElementById('printModal');
+        modal.classList.remove('show');
+    }
+    
+    // إغلاق الـ modal عند النقر خارجها
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('printModal');
+        if (e.target === modal) {
+            closePrintModal();
+        }
+    });
+    
+    window.generatePrintReport = function() {
+        const startDate = document.getElementById('printStartDate').value;
+        const startTime = document.getElementById('printStartTime').value;
+        const endDate = document.getElementById('printEndDate').value;
+        const endTime = document.getElementById('printEndTime').value;
+        
+        if (!startDate || !endDate) {
+            showGlassToast('⚠️ يرجى تحديد تاريخ البداية والنهاية', '⚠️');
+            return;
+        }
+        
+        // إنشاء تاريخ ووقت كامل
+        const startDateTime = new Date(`${startDate}T${startTime}`);
+        const endDateTime = new Date(`${endDate}T${endTime}`);
+        
+        if (startDateTime > endDateTime) {
+            showGlassToast('⚠️ تاريخ البداية يجب أن يكون قبل تاريخ النهاية', '⚠️');
+            return;
+        }
+        
+        // تصفية العمليات حسب التاريخ والوقت
+        const filteredTransactions = cleanTransactions.filter(t => {
+            if (!t.actionTime) return false;
+            const actionTime = new Date(t.actionTime);
+            return actionTime >= startDateTime && actionTime <= endDateTime;
+        });
+        
+        if (filteredTransactions.length === 0) {
+            showGlassToast('⚠️ لا توجد عمليات في الفترة المحددة', '⚠️');
+            return;
+        }
+        
+        // إغلاق الـ modal
+        closePrintModal();
+        
+        // إنشاء التقرير
+        createPrintReport(filteredTransactions, startDateTime, endDateTime);
+        
+        // طباعة بعد تأخير قصير
+        setTimeout(() => {
+            window.print();
+        }, 300);
+    }
+    
+    function createPrintReport(filteredData, startDate, endDate) {
+        const container = document.getElementById('print-report-container');
+        const dateRangeEl = document.getElementById('printDateRange');
+        const generatedTimeEl = document.getElementById('printGeneratedTime');
+        const summaryEl = document.getElementById('printSummary');
+        const tableBody = document.getElementById('printReportBody');
+        
+        // تنسيق التاريخ والوقت
+        const formatDateTime = (date) => {
+            return date.toLocaleString('ar-EG', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        };
+        
+        dateRangeEl.textContent = `من ${formatDateTime(startDate)} إلى ${formatDateTime(endDate)}`;
+        generatedTimeEl.textContent = `تم الإنشاء: ${new Date().toLocaleString('ar-EG')}`;
+        
+        // حساب الإجماليات
+        let totalCash = 0;
+        let totalNet = 0;
+        let totalAmount = 0;
+        
+        filteredData.forEach(t => {
+            const amt = parseFloat(t.amount || 0);
+            totalAmount += amt;
+            
+            if (t.mixDetails) {
+                totalCash += parseFloat(t.mixDetails.cash || 0);
+                totalNet += parseFloat(t.mixDetails.net || 0);
+            } else {
+                if (t.paymentMethod && t.paymentMethod.includes('نقدى')) {
+                    totalCash += amt;
+                } else {
+                    totalNet += amt;
+                }
+            }
+        });
+        
+        // ملء الملخص
+        summaryEl.innerHTML = `
+            <div class="print-summary-item">
+                <div class="print-summary-label">عدد العمليات</div>
+                <div class="print-summary-value">${filteredData.length}</div>
+            </div>
+            <div class="print-summary-item">
+                <div class="print-summary-label">إجمالي النقدي</div>
+                <div class="print-summary-value">${totalCash.toFixed(2)} ريال</div>
+            </div>
+            <div class="print-summary-item">
+                <div class="print-summary-label">إجمالي الشبكة/تحويل</div>
+                <div class="print-summary-value">${totalNet.toFixed(2)} ريال</div>
+            </div>
+            <div class="print-summary-item">
+                <div class="print-summary-label">الإجمالي الكلي</div>
+                <div class="print-summary-value">${totalAmount.toFixed(2)} ريال</div>
+            </div>
+        `;
+        
+        // ملء الجدول
+        tableBody.innerHTML = '';
+        filteredData.forEach((t, index) => {
+            const actionTime = t.actionTime ? new Date(t.actionTime) : null;
+            const checkInDate = t.checkIn ? new Date(t.checkIn) : null;
+            
+            const actionTimeStr = actionTime ? actionTime.toLocaleString('ar-EG', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) : '--';
+            
+            const checkInStr = checkInDate ? checkInDate.toLocaleDateString('ar-EG', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }) : '--';
+            
+            // تنظيف طريقة الدفع من الأيقونات
+            let paymentMethod = t.paymentMethod || '--';
+            paymentMethod = paymentMethod.replace(/✅|⏳|📱|💰/g, '').trim();
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${t.roomNumber || '--'}</td>
+                <td>${t.roomTypeName || '--'}</td>
+                <td>${t.amount || 0} ريال</td>
+                <td>${paymentMethod}</td>
+                <td>${checkInStr}</td>
+                <td>${t.checkOut || '--'}</td>
+                <td>${actionTimeStr}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+        
+        // إظهار container الطباعة
+        container.classList.add('print-active');
+    }
+    
+    // إخفاء container الطباعة بعد الطباعة
+    window.addEventListener('afterprint', function() {
+        const container = document.getElementById('print-report-container');
+        container.classList.remove('print-active');
+    });
     
     window.exportToExcel = function() { 
         if(transactions.length === 0) { alert('لا بيانات'); return; } 
@@ -1193,12 +3296,20 @@ ${recommendation}
     setupDateDropdown();
     toggleRentType();
     togglePaymentSections();
-    updateButtonState();
+    // تم إزالة updateButtonState - رقم الغرفة أصبح إجباري دائماً
 
 </script>
 <script>
+// ✅ ServiceWorker registration - يعمل فقط في http:// أو https:// (وليس file://)
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW register failed', err));
+    const protocol = window.location.protocol;
+    if (protocol && (protocol === 'http:' || protocol === 'https:')) {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+            // تجاهل الخطأ بصمت (يحدث عادة في بيئة التطوير)
+            // console.warn('SW register failed', err);
+        });
+    }
+    // إذا كان البروتوكول file:// أو null، لا نحاول التسجيل (صمت)
 }
 </script>
 
