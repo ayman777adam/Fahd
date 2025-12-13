@@ -7,7 +7,6 @@
     <title>منظومة إيجار يومي شهري مختلط - V34 Ultimate</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700;800&display=swap');
-        /* ... نفس الستايل السابق ... */
         :root {
             --header-bg: #334155; 
             --accent-color: #d4af37;
@@ -59,7 +58,6 @@
             flex-direction: column; gap: 10px; transition: opacity 0.5s;
         }
         
-        /* شريط التقدم الجديد */
         .progress-bar-container {
             width: 80%; max-width: 300px; height: 6px; background: #e2e8f0;
             border-radius: 10px; overflow: hidden; margin-top: 10px;
@@ -205,10 +203,8 @@
         th { text-align: center; font-size: 10px; color: #64748b; padding: 8px 2px; border-bottom: 2px solid #f1f5f9; background: #f8fafc; }
         td { padding: 8px 2px; border-bottom: 1px solid #f1f5f9; font-size: 11px; text-align: center; vertical-align: middle; word-wrap: break-word;}
         
-        /* تحديث ستايل الحالة عند وجود رابط معاينة */
         .confirmed-transfer.pending-transfer { color: #059669; cursor: pointer; text-decoration: underline; font-weight: bold; }
         .confirmed-transfer.pending-transfer:hover { text-decoration: none; background-color: #ecfdf5; border-radius: 4px; }
-
 
         .col-room { width: 15%; font-weight: bold; }
         .col-amt { width: 15%; font-weight: bold; color: var(--header-bg); }
@@ -512,11 +508,10 @@
       appId: "1:134497063312:web:d8f589f291d55a85a2e315"
     };
 
-    let app, db; // تم إزالة storage
+    let app, db; 
     try {
         app = initializeApp(firebaseConfig);
         db = getDatabase(app);
-        // تم حذف تهيئة storage
     } catch(e) {
         document.getElementById('loaderText').innerHTML = "<div style='color:red'>خطأ في تهيئة النظام!</div>";
         document.getElementById('forceOpenBtn').style.display = 'block';
@@ -524,32 +519,32 @@
     }
 
     let transactions = [];
+    let cleanTransactions = []; // <-- مصفوفة الحجوزات النظيفة
     const transactionsRef = ref(db, 'transactions');
     const vacancyRef = ref(db, 'vacancies');
 
     let lastReportTime = 0;
 
-    // --- نظام التحميل المتدرج مع مؤشر التقدم (مدمج) ---
-    let displayedCount = 0; // عدد العمليات المعروضة حالياً
+    // --- نظام التحميل المتدرج المعدل ---
+    let displayedCount = 0; 
     
     window.setupLazyLoading = function() {
         displayedCount = 0;
-        const initialLimit = 2; // عرض آخر عمليتين فقط
+        const initialLimit = 5; // <-- زيادة العدد إلى 5
         
         document.querySelector('#historyTable tbody').innerHTML = '';
         
-        // عرض آخر عمليتين فقط (transactions مرتبة من الأحدث للأقدم)
-        const initialBatch = transactions.slice(0, initialLimit);
+        // استخدام المصفوفة النظيفة للعرض
+        const initialBatch = cleanTransactions.slice(0, initialLimit);
         displayedCount = initialBatch.length;
         window.updateUIBatch(initialBatch);
         
-        // إظهار/إخفاء زر المزيد
         const btnMore = document.getElementById('btn-more-log');
         if (btnMore) {
-            btnMore.style.display = transactions.length > initialLimit ? 'block' : 'none';
+            // المقارنة مع طول المصفوفة النظيفة
+            btnMore.style.display = cleanTransactions.length > initialLimit ? 'block' : 'none';
         }
         
-        // إخفاء loader
         const loader = document.getElementById('loader');
         if(loader) {
             loader.style.opacity = '0';
@@ -558,17 +553,17 @@
     }
     
     window.loadMoreLog = function() {
-        const step = 2; // زيادة عمليتين في كل مرة
-        const nextBatch = transactions.slice(displayedCount, displayedCount + step);
+        const step = 5; // زيادة 5
+        // التحميل من المصفوفة النظيفة
+        const nextBatch = cleanTransactions.slice(displayedCount, displayedCount + step);
         
         if (nextBatch.length > 0) {
             window.updateUIBatch(nextBatch);
             displayedCount += nextBatch.length;
             
-            // إخفاء زر المزيد إذا لم يتبقى المزيد
             const btnMore = document.getElementById('btn-more-log');
             if (btnMore) {
-                btnMore.style.display = displayedCount < transactions.length ? 'block' : 'none';
+                btnMore.style.display = displayedCount < cleanTransactions.length ? 'block' : 'none';
             }
         }
     }
@@ -578,6 +573,7 @@
         const todayStr = new Date().toLocaleDateString('en-GB');
 
         batch.forEach((t) => {
+            // تحقق إضافي رغم أن cleanTransactions مفلترة بالفعل
             if (!t.roomNumber) return;
 
             const row = document.createElement('tr');
@@ -594,7 +590,6 @@
             if (t.paymentMethod.includes('لم يؤكد')) {
                 paymentDisplay = `<span class="pending-transfer" onclick="toggleBankStatus('${t.firebaseKey}', '${t.paymentMethod}')">${t.paymentMethod}</span>`;
             } else if (t.paymentMethod.includes('تم الاستلام')) {
-                // تم إعادة الكود للشكل الأصلي بدون منطق showReceipt
                 paymentDisplay = `<span class="confirmed-transfer">${t.paymentMethod}</span>`;
             }
 
@@ -621,7 +616,7 @@
         });
     }
 
-    // --- نظام إعادة المحاولة (اضافة الصديق الثالث) ---
+    // --- نظام إعادة المحاولة ---
     window.retryFailedOperations = function() {
         const failedOps = JSON.parse(localStorage.getItem('failed_operations') || '[]');
         if (failedOps.length > 0) {
@@ -644,25 +639,33 @@
     onValue(transactionsRef, (snapshot) => {
         const data = snapshot.val();
         transactions = [];
+        cleanTransactions = []; // <-- تصفير المصفوفة النظيفة
         lastReportTime = 0;
         
         if (data) {
             Object.keys(data).forEach(key => {
                 const t = { ...data[key], firebaseKey: key };
                 transactions.push(t);
+                
+                // <-- إضافة للقائمة النظيفة فقط إذا كان حجزاً (يحتوي رقم غرفة)
+                if (t.roomNumber) {
+                    cleanTransactions.push(t);
+                }
+
                 if (!t.roomNumber && t.actionTime) {
                     const tTime = new Date(t.actionTime).getTime();
                     if (tTime > lastReportTime) lastReportTime = tTime;
                 }
             });
+            // ترتيب المصفوفتين
             transactions.sort((a, b) => b.id - a.id);
+            cleanTransactions.sort((a, b) => b.id - a.id);
         }
 
         updateStatistics();
-        setupLazyLoading();
+        setupLazyLoading(); // <-- سيستخدم الآن القائمة النظيفة
         checkReportTimer();
         
-        // محاولة إعادة العمليات الفاشلة عند نجاح الاتصال
         window.retryFailedOperations();
 
     }, (error) => {
@@ -672,13 +675,13 @@
     });
 
     onValue(vacancyRef, (snapshot) => {
-        const data = snapshot.val() || { v1: 0, v2: 0, v3: 0, b1: 0, b2: 0, b3: 0 }; // إضافة v3, b3
+        const data = snapshot.val() || { v1: 0, v2: 0, v3: 0, b1: 0, b2: 0, b3: 0 }; 
         document.getElementById('vac1Input').value = data.v1;
         document.getElementById('vac2Input').value = data.v2;
-        document.getElementById('vac3Input').value = data.v3; // جلب V3
+        document.getElementById('vac3Input').value = data.v3; 
         document.getElementById('book1Input').value = data.b1 || '';
         document.getElementById('book2Input').value = data.b2 || '';
-        document.getElementById('book3Input').value = data.b3 || ''; // جلب B3
+        document.getElementById('book3Input').value = data.b3 || ''; 
         
         updateTopCounters(data.v1, data.v2, data.v3, data.b1, data.b2, data.b3);
     });
@@ -775,30 +778,30 @@
     window.saveVacanciesToCloud = function() {
         const v1 = document.getElementById('vac1Input').value;
         const v2 = document.getElementById('vac2Input').value;
-        const v3 = document.getElementById('vac3Input').value; // V3
+        const v3 = document.getElementById('vac3Input').value; 
         const b1 = document.getElementById('book1Input').value;
         const b2 = document.getElementById('book2Input').value;
-        const b3 = document.getElementById('book3Input').value; // B3
-        update(vacancyRef, { v1: v1, v2: v2, v3: v3, b1: b1, b2: b2, b3: b3 }); // تحديث
+        const b3 = document.getElementById('book3Input').value; 
+        update(vacancyRef, { v1: v1, v2: v2, v3: v3, b1: b1, b2: b2, b3: b3 }); 
     }
 
-    window.updateTopCounters = function(v1, v2, v3, b1 = 0, b2 = 0, b3 = 0) { // إضافة v3, b3 للمعاملات
+    window.updateTopCounters = function(v1, v2, v3, b1 = 0, b2 = 0, b3 = 0) { 
         if(v1 === undefined) { saveVacanciesToCloud(); return; }
         const net1 = (parseInt(v1) || 0) - (parseInt(b1) || 0);
         const net2 = (parseInt(v2) || 0) - (parseInt(b2) || 0);
-        const net3 = (parseInt(v3) || 0) - (parseInt(b3) || 0); // حساب net3
+        const net3 = (parseInt(v3) || 0) - (parseInt(b3) || 0); 
 
         document.getElementById('count-1bhk').innerText = net1;
         document.getElementById('count-2bhk').innerText = net2;
-        document.getElementById('count-single').innerText = net3; // تحديث العداد
+        document.getElementById('count-single').innerText = net3; 
         
         document.getElementById('detail-1bhk').innerText = `(متاح للحجز ${net1} - محجوز ${b1})`;
         document.getElementById('detail-2bhk').innerText = `(متاح للحجز ${net2} - محجوز ${b2})`;
-        document.getElementById('detail-single').innerText = `(متاح للحجز ${net3} - محجوز ${b3})`; // تحديث التفاصيل
+        document.getElementById('detail-single').innerText = `(متاح للحجز ${net3} - محجوز ${b3})`; 
 
         const card1 = document.getElementById('card-1bhk');
         const card2 = document.getElementById('card-2bhk');
-        const card3 = document.getElementById('card-single'); // الكرت الجديد
+        const card3 = document.getElementById('card-single'); 
 
         if ((parseInt(b1) || 0) >= (parseInt(v1) || 0) && (parseInt(v1) > 0 || parseInt(b1) > 0)) {
             card1.classList.add('card-red'); card1.classList.remove('card-yellow');
@@ -812,7 +815,6 @@
             card2.classList.add('card-yellow'); card2.classList.remove('card-red');
         }
         
-        // منطق تلوين الكرت المفرد الجديد
         if ((parseInt(b3) || 0) >= (parseInt(v3) || 0) && (parseInt(v3) > 0 || parseInt(b3) > 0)) {
             card3.classList.add('card-red'); card3.classList.remove('card-yellow');
         } else {
@@ -851,7 +853,6 @@
         window.calculateCheckout();
     }
     
-    // [START] New Upload Check Function
     window.checkBankStatus = function() {
         const status = document.getElementById('bankStatusSelect').value;
         const uploadDiv = document.getElementById('uploadOptionsDiv');
@@ -862,12 +863,10 @@
             uploadDiv.style.display = 'block';
         } else {
             uploadDiv.style.display = 'none';
-            // مسح الملفات عند تغيير الحالة لعدم "تم الاستلام"
             cameraInput.value = '';
             fileInput.value = '';
         }
     }
-    // [END] New Upload Check Function
 
     window.togglePaymentSections = function() {
         const method = document.getElementById('paymentMethod').value;
@@ -877,12 +876,12 @@
 
         bankSec.style.display = 'none'; mixedSec.style.display = 'none';
         paidInput.readOnly = false; paidInput.style.backgroundColor = "#f8fafc";
-        window.checkBankStatus(); // إخفاء خيارات الرفع عند تغيير طريقة الدفع
+        window.checkBankStatus(); 
 
         if (method === 'تحويل') {
             bankSec.style.display = 'block';
             document.getElementById('bankStatusSelect').setAttribute('required', 'required');
-            window.checkBankStatus(); // استدعاء دالة التحقق من الحالة عند اختيار "تحويل"
+            window.checkBankStatus(); 
         } else if (method === 'مختلط') {
             mixedSec.style.display = 'block';
             paidInput.readOnly = true; paidInput.style.backgroundColor = "#e2e8f0";
@@ -928,7 +927,7 @@
         }
     }
 
-    document.getElementById('checkinForm').addEventListener('submit', function(e) { // إزالة async
+    document.getElementById('checkinForm').addEventListener('submit', function(e) { 
         e.preventDefault();
         window.saveVacanciesToCloud();
 
@@ -950,7 +949,6 @@
             return;
         }
 
-        // [START] Required Manual Attachment Check
         const pMethod = document.getElementById('paymentMethod').value;
         const bStatus = (pMethod === 'تحويل') ? document.getElementById('bankStatusSelect').value : null;
         
@@ -962,9 +960,7 @@
                 alert('⚠️ يجب اختيار ملف إيصال التحويل (تصوير أو رفع) لتأكيد الإرسال اليدوي عبر WhatsApp.');
                 return;
             }
-            // تشغيل الكاميرا/الرفع تم بنجاح، نتابع الحفظ
         }
-        // [END] Required Manual Attachment Check
         
         window.calculateRemaining();
 
@@ -972,10 +968,10 @@
         
         let currentV1 = parseInt(document.getElementById('vac1Input').value) || 0;
         let currentV2 = parseInt(document.getElementById('vac2Input').value) || 0;
-        let currentV3 = parseInt(document.getElementById('vac3Input').value) || 0; // V3
+        let currentV3 = parseInt(document.getElementById('vac3Input').value) || 0; 
         const b1 = document.getElementById('book1Input').value;
         const b2 = document.getElementById('book2Input').value;
-        const b3 = document.getElementById('book3Input').value; // B3
+        const b3 = document.getElementById('book3Input').value; 
         
         update(vacancyRef, { v1: currentV1, v2: currentV2, v3: currentV3, b1: b1, b2: b2, b3: b3 });
 
@@ -995,7 +991,7 @@
             id: Date.now(),
             roomNumber: roomNum,
             roomType: rTypeInput,
-            roomTypeName: (rTypeInput === '1bhk') ? 'غرفة وصالة' : (rTypeInput === '2bhk' ? 'غرفتين' : 'غرفة مفرد'), // تحديث
+            roomTypeName: (rTypeInput === '1bhk') ? 'غرفة وصالة' : (rTypeInput === '2bhk' ? 'غرفتين' : 'غرفة مفرد'), 
             bookingSource: document.getElementById('bookingSource').value,
             amount: document.getElementById('paidAmount').value,
             paymentMethod: finalPayMethod,
@@ -1009,10 +1005,9 @@
             isHandedOver: false,
             totalContract: document.getElementById('totalRentAmount').value || 0,
             debt: document.getElementById('remainingAmount').value || 0,
-            receiptURL: null // تم تعيينه إلى null لأننا لا نرفع الملف
+            receiptURL: null 
         };
 
-        // التعديل هنا: محاولة الارسال، وإذا فشل نحفظه محلياً للإعادة
         push(transactionsRef, data)
             .catch((error) => {
                 console.error('Failed to save:', error);
@@ -1039,14 +1034,14 @@
 
         const v1 = document.getElementById('vac1Input').value;
         const v2 = document.getElementById('vac2Input').value;
-        const v3 = document.getElementById('vac3Input').value; // V3
+        const v3 = document.getElementById('vac3Input').value; 
         const b1 = document.getElementById('book1Input').value;
         const b2 = document.getElementById('book2Input').value;
-        const b3 = document.getElementById('book3Input').value; // B3
+        const b3 = document.getElementById('book3Input').value; 
         
         const net1 = (parseInt(v1) || 0) - (parseInt(b1) || 0);
         const net2 = (parseInt(v2) || 0) - (parseInt(b2) || 0);
-        const net3 = (parseInt(v3) || 0) - (parseInt(b3) || 0); // net3
+        const net3 = (parseInt(v3) || 0) - (parseInt(b3) || 0); 
 
         const dateObj = new Date(data.checkIn);
         const dateStr = dateObj.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' });
@@ -1060,7 +1055,7 @@
         const timeObj = new Date(data.actionTime);
         const timeStr = timeObj.toLocaleString('ar-EG');
 
-        const recommendation = window.generateRecommendationText(v1, v2, v3, b1, b2, b3); // إضافة v3, b3 للمعاملات
+        const recommendation = window.generateRecommendationText(v1, v2, v3, b1, b2, b3); 
 
         const text = `تقرير إيجار غرفة ${data.roomNumber} - ${data.roomTypeName}
 ----------------------------
@@ -1083,23 +1078,22 @@ ${recommendation}
     window.sendStatusWhatsapp = function() {
         const v1 = document.getElementById('vac1Input').value || 0;
         const v2 = document.getElementById('vac2Input').value || 0;
-        const v3 = document.getElementById('vac3Input').value || 0; // V3
+        const v3 = document.getElementById('vac3Input').value || 0; 
         const b1 = document.getElementById('book1Input').value || 0;
         const b2 = document.getElementById('book2Input').value || 0;
-        const b3 = document.getElementById('book3Input').value || 0; // B3
+        const b3 = document.getElementById('book3Input').value || 0; 
         
         const net1 = (parseInt(v1) || 0) - (parseInt(b1) || 0);
         const net2 = (parseInt(v2) || 0) - (parseInt(b2) || 0);
-        const net3 = (parseInt(v3) || 0) - (parseInt(b3) || 0); // net3
+        const net3 = (parseInt(v3) || 0) - (parseInt(b3) || 0); 
         
         const now = new Date();
-        // تنسيق الوقت المطلوب: ٥:٠٨ مساءً (أو ٥:٥٢م كما في المثال الأخير)
         const nowStr = now.toLocaleTimeString('ar-EG', {hour: 'numeric', minute:'numeric', hour12: true}).replace(/ /g, ''); 
         const next = new Date(now.getTime() + 4*60*60*1000);
         const nextStr = next.toLocaleTimeString('ar-EG', {hour: 'numeric', minute:'numeric', hour12: true}).replace(/ /g, '');
         const fullDate = now.toLocaleString('ar-EG');
         
-        const recommendation = window.generateRecommendationText(v1, v2, v3, b1, b2, b3); // جلب نص التوصية
+        const recommendation = window.generateRecommendationText(v1, v2, v3, b1, b2, b3); 
 
         const text = `-----------------------------
 تقرير حالة الإشغال الحالي
@@ -1129,17 +1123,15 @@ ${recommendation}
         const ws = XLSX.utils.json_to_sheet(d); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "التقرير"); XLSX.writeFile(wb, `تقرير.xlsx`); 
     }
 
-    // [START] New Recommendation Function
-    window.generateRecommendationText = function(v1, v2, v3, b1, b2, b3) { // إضافة v3, b3 للمعاملات
+    window.generateRecommendationText = function(v1, v2, v3, b1, b2, b3) { 
         let recs = [];
         const vac1 = parseInt(v1) || 0;
         const vac2 = parseInt(v2) || 0;
-        const vac3 = parseInt(v3) || 0; // vac3
+        const vac3 = parseInt(v3) || 0; 
         const book1 = parseInt(b1) || 0;
         const book2 = parseInt(b2) || 0;
-        const book3 = parseInt(b3) || 0; // book3
+        const book3 = parseInt(b3) || 0; 
         
-        // التوصية لغرفة مفرد (جديد)
         if (book3 >= vac3 && (vac3 > 0 || book3 > 0)) {
             const surplus = book3 - vac3;
             recs.push(`⛔ قفل بوكينج (غرفة مفرد) فوراً عندك فائض عدد ${surplus} حجوزات !`);
@@ -1148,7 +1140,6 @@ ${recommendation}
             recs.push(`✅ فتح عدد ${diff} (غرفة مفرد) على بوكينج " شاغر كثير"`);
         }
 
-        // التوصية لغرفة وصالة
         if (book1 >= vac1 && (vac1 > 0 || book1 > 0)) {
             const surplus = book1 - vac1;
             recs.push(`⛔ قفل بوكينج (غرفة وصالة) فوراً عندك فائض عدد ${surplus} حجوزات !`);
@@ -1157,7 +1148,6 @@ ${recommendation}
             recs.push(`✅ فتح عدد ${diff} (غرفة وصالة) على بوكينج " شاغر كثير"`);
         }
 
-        // التوصية لغرفتين
         if (book2 >= vac2 && (vac2 > 0 || book2 > 0)) {
             const surplus = book2 - vac2;
             recs.push(`⛔ قفل بوكينج (غرفتين) فوراً عندك فائض عدد ${surplus} حجوزات !`);
@@ -1173,7 +1163,6 @@ ${recommendation}
         return `----------------------------
 منظومه الإيجار المختلط تنصح ب\n${recs.join('\n')}`;
     }
-    // [END] New Recommendation Function
 
     window.setupDateDropdown = function() {
         const select = document.getElementById('checkInDate');
