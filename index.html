@@ -126,10 +126,34 @@
 
         #loader { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(255,255,255,0.98); z-index: 99999;
-            display: flex; justify-content: center; align-items: center;
-            font-family: 'Cairo', sans-serif; font-size: 16px; color: var(--header-bg);
-            flex-direction: column; gap: 10px; transition: opacity 0.5s;
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%) !important;
+            z-index: 99999;
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Cairo', sans-serif;
+            font-size: 18px;
+            color: var(--primary-dark);
+            flex-direction: column;
+            gap: 20px;
+            transition: opacity 0.5s;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+        #loader .spinner {
+            font-size: 48px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        #loaderText {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--primary-dark);
+            text-align: center;
+            padding: 0 20px;
         }
         
         .progress-bar-container {
@@ -142,45 +166,25 @@
         }
 
         .main-header {
-            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 30%, #2dd4bf 60%, #5eead4 100%);
-            color: var(--text-white); 
-            padding: 40px 32px; 
-            border-radius: 28px;
+            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #2dd4bf 100%);
+            color: #ffffff; 
+            padding: 24px 32px; 
+            border-radius: 20px;
             text-align: center; 
-            margin-bottom: 36px; 
+            margin-bottom: 32px; 
             box-shadow: 
-                0 25px 80px rgba(13, 148, 136, 0.5),
-                0 10px 30px rgba(13, 148, 136, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4),
-                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
-            border: 3px solid rgba(255, 255, 255, 0.5);
+                0 8px 32px rgba(13, 148, 136, 0.3),
+                0 4px 16px rgba(13, 148, 136, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             position: relative;
             overflow: hidden;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-        }
-        .main-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .main-header:hover {
-            transform: translateY(-6px) scale(1.01);
-            box-shadow: 
-                0 35px 100px rgba(13, 148, 136, 0.6),
-                0 15px 40px rgba(13, 148, 136, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.5),
-                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            min-height: 100px;
         }
         .main-header::before {
             content: '';
@@ -188,40 +192,124 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
-            background: var(--accent-gradient);
-            background-size: 200% 100%;
-            animation: shimmer 4s ease-in-out infinite;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                transparent 50%, 
+                rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
         }
-        .main-header::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            animation: pulse 8s ease-in-out infinite;
+        
+        .main-header:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 12px 40px rgba(13, 148, 136, 0.4),
+                0 6px 20px rgba(13, 148, 136, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
-        @keyframes shimmer {
-            0%, 100% { background-position: -200% 0; }
-            50% { background-position: 200% 0; }
+        .header-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 0; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.1); }
-        }
+        
         .header-content h1 { 
             margin: 0; 
-            font-size: 26px; 
-            font-weight: 900; 
-            letter-spacing: 1px;
+            font-size: 22px; 
+            font-weight: 800; 
+            letter-spacing: 0.5px;
             text-shadow: 
-                0 4px 12px rgba(0, 0, 0, 0.4),
-                0 2px 4px rgba(0, 0, 0, 0.3),
-                0 0 20px rgba(255, 255, 255, 0.3);
+                0 2px 8px rgba(0, 0, 0, 0.2),
+                0 1px 3px rgba(0, 0, 0, 0.15);
+            color: #ffffff;
             position: relative;
             z-index: 1;
+            line-height: 1.4;
+        }
+        
+        /* Adora Logo Styles - تصميم احترافي */
+        .adora-logo {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+        
+        .adora-logo-container {
+            position: relative;
+            display: inline-block;
+            height: 60px;
+            margin-right: 12px;
+        }
+        
+        .adora-letter-a {
+            font-size: 56px;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(255, 255, 255, 0.2);
+            line-height: 1;
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            position: relative;
+        }
+        
+        .adora-sun {
+            position: absolute;
+            top: -8px;
+            right: -6px;
+            width: 14px;
+            height: 14px;
+            background: #facc15;
+            border-radius: 50%;
+            box-shadow: 
+                0 0 8px rgba(250, 204, 21, 0.9),
+                0 0 16px rgba(250, 204, 21, 0.6);
+            z-index: 3;
+        }
+        
+        .adora-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            line-height: 1.3;
+        }
+        
+        .adora-name {
+            font-size: 20px;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 
+                0 2px 6px rgba(0, 0, 0, 0.3),
+                0 0 12px rgba(255, 255, 255, 0.2);
+            letter-spacing: 2px;
+            font-family: 'Arial', 'Helvetica', sans-serif;
+            margin-bottom: 2px;
+        }
+        
+        .adora-arabic {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 
+                0 1px 4px rgba(0, 0, 0, 0.25);
+            font-weight: 600;
+            margin-bottom: 1px;
+        }
+        
+        .adora-english {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.25);
+            font-weight: 500;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
         }
 
@@ -443,8 +531,9 @@
             font-family: 'Tajawal'; 
             font-size: 15px; 
             display: flex; 
-            flex-direction: column;
+            flex-direction: row;
             align-items: center; 
+            justify-content: center;
             gap: 8px; 
             box-shadow: 
                 0 8px 20px rgba(0, 0, 0, 0.2),
@@ -455,6 +544,11 @@
             overflow: hidden;
             letter-spacing: 0.5px;
             border: 2px solid rgba(255, 255, 255, 0.2);
+            min-height: 60px;
+            text-align: center;
+            line-height: 1.4;
+            word-wrap: break-word;
+            white-space: normal;
         }
         .btn-action::before {
             content: '';
@@ -1339,13 +1433,54 @@
         }
         
         .main-header {
-            padding: 20px 16px;
+            padding: 16px 12px;
             margin-bottom: 16px;
-            border-radius: var(--border-radius-lg);
+            border-radius: 16px;
+            flex-direction: column;
+            gap: 12px;
+            min-height: auto;
+        }
+        
+        .adora-logo {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .adora-logo-container {
+            height: 45px;
+            margin-right: 10px;
+        }
+        
+        .adora-letter-a {
+            font-size: 42px;
+        }
+        
+        .adora-sun {
+            width: 12px;
+            height: 12px;
+            top: -6px;
+            right: -5px;
+        }
+        
+        .adora-name {
+            font-size: 16px;
+        }
+        
+        .adora-arabic {
+            font-size: 10px;
+        }
+        
+        .adora-english {
+            font-size: 8px;
+        }
+        
+        .header-content {
+            width: 100%;
         }
         
         .header-content h1 {
-            font-size: 18px;
+            font-size: 16px;
+            text-align: center;
         }
         
         .finance-section {
@@ -1369,9 +1504,16 @@
         }
         
         .btn-action {
-            padding: 16px 20px;
-            font-size: 13px;
-            min-height: 56px; /* Touch target size */
+            padding: 18px 16px !important;
+            font-size: 14px !important;
+            min-height: 64px !important; /* Touch target size - موحد للجميع */
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            line-height: 1.5 !important;
+            word-wrap: break-word !important;
+            white-space: normal !important;
         }
         
         .status-cards {
@@ -1566,8 +1708,14 @@
             }
             
             .btn-action {
-                padding: 14px 16px;
-                font-size: 12px;
+                padding: 18px 14px !important;
+                font-size: 13px !important;
+                min-height: 64px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                line-height: 1.5 !important;
             }
             
             input, select {
@@ -1584,6 +1732,17 @@
             
             .action-buttons {
                 grid-template-columns: 1fr 1fr;
+            }
+            
+            .btn-action {
+                padding: 18px 14px !important;
+                font-size: 13px !important;
+                min-height: 64px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                line-height: 1.5 !important;
             }
             
             .form-grid {
@@ -1802,8 +1961,8 @@
         <div id="progressBarFill" class="progress-bar-fill"></div>
     </div>
 
-    <button id="forceOpenBtn" style="display:none; margin-top:20px; padding:10px 20px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="document.getElementById('loader').style.display='none'">
-        ⚠️ فتح النظام بالقوة (تجاوز الانتظار)
+    <button id="forceOpenBtn" style="display:none; margin-top:20px; padding:14px 28px; background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color:#ffffff; border:2px solid rgba(255,255,255,0.3); border-radius:12px; font-weight:bold; font-size:16px; cursor:pointer; box-shadow:0 4px 12px rgba(239,68,68,0.3); transition:all 0.3s;" onclick="const loader=document.getElementById('loader'); if(loader){loader.style.opacity='0'; setTimeout(()=>{loader.style.display='none';loader.style.visibility='hidden';},300);}">
+        ⚠️ فتح النظام الآن
     </button>
 </div>
 
@@ -1818,8 +1977,19 @@
     <div id="reportAlert">⚠️ الرجاء سرعة إرسال تقرير الإشغال</div>
 
     <div class="main-header" id="mainHeader">
+        <div class="adora-logo">
+            <div class="adora-logo-container">
+                <div class="adora-letter-a">A</div>
+                <div class="adora-sun"></div>
+            </div>
+            <div class="adora-text">
+                <div class="adora-name">ADORA</div>
+                <div class="adora-arabic">منظومة إدارة الفنادق</div>
+                <div class="adora-english">HOTEL MANAGEMENT SYSTEM</div>
+            </div>
+        </div>
         <div class="header-content">
-            <h1>🏢 منظومة Adora إيجار يومي شهري مختلط</h1>
+            <h1>يومي شهري مختلط</h1>
         </div>
     </div>
 
@@ -2149,13 +2319,38 @@
       appId: "1:134497063312:web:d8f589f291d55a85a2e315"
     };
 
+    // ✅ Timeout تلقائي للـ loader - يظهر زر "فتح النظام" بعد 10 ثوانٍ
+    let loaderTimeout;
+    const LOADER_TIMEOUT = 10000; // 10 ثوانٍ
+    
+    function showForceOpenButton() {
+        const forceBtn = document.getElementById('forceOpenBtn');
+        const loaderText = document.getElementById('loaderText');
+        if (forceBtn) {
+            forceBtn.style.display = 'block';
+        }
+        if (loaderText) {
+            loaderText.innerHTML = "⚠️ الاتصال بطيء... يمكنك فتح النظام الآن";
+        }
+    }
+    
+    // بدء العد التنازلي
+    loaderTimeout = setTimeout(showForceOpenButton, LOADER_TIMEOUT);
+
     let app, db; 
     try {
         app = initializeApp(firebaseConfig);
         db = getDatabase(app);
     } catch(e) {
-        document.getElementById('loaderText').innerHTML = "<div style='color:red'>خطأ في تهيئة النظام!</div>";
-        document.getElementById('forceOpenBtn').style.display = 'block';
+        clearTimeout(loaderTimeout);
+        const loaderText = document.getElementById('loaderText');
+        const forceBtn = document.getElementById('forceOpenBtn');
+        if (loaderText) {
+            loaderText.innerHTML = "<div style='color:#dc2626; font-weight:bold;'>⚠️ خطأ في تهيئة النظام!</div>";
+        }
+        if (forceBtn) {
+            forceBtn.style.display = 'block';
+        }
         console.error(e);
     }
 
@@ -2186,10 +2381,15 @@
             btnMore.style.display = cleanTransactions.length > initialLimit ? 'block' : 'none';
         }
         
+        // ✅ إلغاء الـ timeout وإخفاء الـ loader
+        clearTimeout(loaderTimeout);
         const loader = document.getElementById('loader');
         if(loader) {
             loader.style.opacity = '0';
-            setTimeout(() => { loader.style.display = 'none'; }, 500);
+            setTimeout(() => { 
+                loader.style.display = 'none';
+                loader.style.visibility = 'hidden';
+            }, 500);
         }
     }
     
@@ -2334,9 +2534,16 @@
         window.retryFailedOperations();
 
     }, (error) => {
+        clearTimeout(loaderTimeout);
         console.error(error);
-        document.getElementById('loaderText').innerText = "تعذر جلب البيانات، نعمل دون اتصال";
-        document.getElementById('forceOpenBtn').style.display = 'block';
+        const loaderText = document.getElementById('loaderText');
+        const forceBtn = document.getElementById('forceOpenBtn');
+        if (loaderText) {
+            loaderText.innerHTML = "⚠️ تعذر جلب البيانات، يمكنك فتح النظام الآن";
+        }
+        if (forceBtn) {
+            forceBtn.style.display = 'block';
+        }
     });
 
     onValue(vacancyRef, (snapshot) => {
